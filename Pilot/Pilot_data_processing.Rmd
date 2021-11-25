@@ -1,0 +1,221 @@
+---
+title: "Social Semantics: PILOT"
+author: "Veronica Diveica"
+output:
+  word_document: default
+
+The following code explores the data from the pilot study:
+- participant sample descriptives
+- reliability analyses, including split half and intra-class correlation coefficient
+- summary statistics for the item-wise socialness ratings
+- investigates the influence of instruction version on instruction understanding and mean socialness ratings
+
+# Session Information:
+# R version 3.6.1 (2019-07-05)
+# Platform: x86_64-apple-darwin15.6.0 (64-bit)
+# Running under: macOS Mojave 10.14.6, RStudio 1.2.5001
+# 
+# Locale: en_GB.UTF-8 / en_GB.UTF-8 / en_GB.UTF-8 / C / en_GB.UTF-8 / en_GB.UTF-8
+# 
+# Package version:
+#   abind_1.4-5         askpass_1.1         assertthat_0.2.1    backports_1.2.1     base64enc_0.1-3     BH_1.69.0.1         blob_1.2.1         
+#   boot_1.3-22         broom_0.7.9.9000    callr_3.5.1         cellranger_1.1.0    checkmate_2.0.0     cli_3.0.1           clipr_0.7.0        
+#   codetools_0.2-16    colorspace_2.0-1    compiler_3.6.1      cpp11_0.3.1         crayon_1.4.1        curl_4.3            DBI_1.1.0          
+#   dbplyr_1.4.4        digest_0.6.27       dplyr_1.0.7         ellipsis_0.3.2      evaluate_0.14       fansi_0.5.0         farver_2.1.0       
+#   forcats_0.5.1       foreach_1.5.1       fs_1.4.1            generics_0.1.0      ggplot2_3.3.3       glue_1.4.2          graphics_3.6.1     
+#   grDevices_3.6.1     grid_3.6.1          gridExtra_2.3       gtable_0.3.0        haven_2.3.1         highr_0.9           hms_0.5.3          
+#   htmltools_0.5.1.1   httr_1.4.1          isoband_0.2.4       iterators_1.0.13    jsonlite_1.7.2      knitr_1.33          labeling_0.4.2     
+#   lattice_0.20-38     lifecycle_1.0.0     lme4_1.1-26         lubridate_1.7.9     magick_2.6.0        magrittr_2.0.1      markdown_1.1       
+#   MASS_7.3-51.4       Matrix_1.2-17       matrixStats_0.56.0  methods_3.6.1       mgcv_1.8.28         mime_0.11           minqa_1.2.4        
+#   mnormt_1.5-5        modelr_0.1.8        multicon_1.6        munsell_0.5.0       mvtnorm_1.1-1       naniar_0.6.0        nlme_3.1-140       
+#   nloptr_1.2.2.2      openssl_1.4.1       pander_0.6.3        parallel_3.6.1      pillar_1.6.2        pkgconfig_2.0.3     plyr_1.8.4         
+#   prettyunits_1.1.1   processx_3.4.5      progress_1.2.2      pryr_0.1.4          ps_1.5.0            psych_2.1.6         purrr_0.3.4        
+#   R6_2.5.0            rapportools_1.0     RColorBrewer_1.1.2  Rcpp_1.0.6          RcppEigen_0.3.3.9.1 readr_1.3.1         readxl_1.3.1       
+#   rematch_1.0.1       reprex_0.3.0        reshape_0.8.8       rlang_0.4.11        rmarkdown_2.10      rstudioapi_0.13     rvest_0.3.5        
+#   scales_1.1.1        sciplot_1.2-0       selectr_0.4.2       splines_3.6.1       statmod_1.4.35      stats_3.6.1         stringi_1.7.3      
+#   stringr_1.4.0       summarytools_0.9.8  sys_3.3             tcltk_3.6.1         tibble_3.1.3        tidyr_1.1.3         tidyselect_1.1.1   
+#   tidyverse_1.3.0     tinytex_0.33        tools_3.6.1         UpSetR_1.4.0        utf8_1.2.2          utils_3.6.1         vctrs_0.3.8        
+#   viridis_0.5.1       viridisLite_0.4.0   visdat_0.5.3        whisker_0.4         withr_2.4.2         xfun_0.25           xml2_1.3.2         
+#   yaml_2.2.1
+  
+---
+
+```{r load packages, include=FALSE}
+library(tidyverse)
+library(naniar)
+library(summarytools)
+library(multicon)
+library(psych)
+
+```
+
+
+```{r load & clean data, include = FALSE}
+
+#Read in csv files
+raw1 <- read_csv("Data/Raw/Raw_Version1.csv")
+raw2 <- read_csv("Data/Raw/Raw_Version2.csv")
+words <- read_csv("Data/Raw/Word_to_ID.csv")
+
+# CLEAN DATA
+# instruction version 1
+clean_1 <- raw1 %>%
+  dplyr::select(Participant_ID, Progress,`Duration (in seconds)`, starts_with("D_Q"), I_Q1, I_Q2, ends_with("_R_Q1")) %>% # select columns of interest
+  filter(Progress == 100) %>% # only keep data from participants who completed the experiment
+  dplyr::select(!Progress) %>%
+  replace_with_na_all(condition = ~.x == -99) %>% # record missing responses as NA 
+  replace_with_na_all(condition = ~.x == -123) # record 'I do't know the meanign of this word' responses as NA
+# instruction version 2
+clean_2 <- raw2 %>%
+  dplyr::select(Participant_ID, Progress,`Duration (in seconds)`, starts_with("D_Q"), I_Q1, I_Q2, ends_with("_R_Q1")) %>% # select columns of interest
+  filter(Progress == 100) %>% # only keep data from participants who completed the experiment
+  dplyr::select(!Progress) %>%
+  replace_with_na_all(condition = ~.x == -99) %>% # record missing responses as NA 
+  replace_with_na_all(condition = ~.x == -123) # record 'I do't know the meanign of this word' responses as NA
+# combine & format
+clean_1$Version <- "1"
+clean_2$Version <- "2"
+clean <- rbind(clean_1, clean_2)
+colnames(clean)[3:8] <- c("Age", "Gender", "English_native" , "English_level", "Instruct_understand", "Instruct_confused")
+
+
+# ratings only
+ratings <- clean %>% dplyr::select(Participant_ID,Version, ends_with("R_Q1")) %>% column_to_rownames(var = "Participant_ID")
+
+
+```
+
+**Participants**
+
+Before starting the main experiment, we tested our socialness rating task in a sample of `r nrow(clean)` participants (`r sum(clean$Gender == 'F')` female, `r sum(clean$Gender == 'M')` male; *Mage* = `r round(mean(clean$Age), digits = 2)`, *SDage* = `r round(sd(clean$Age), digits = 2)`). Participants were recruited from the participant pool at Bangor University. Participants completed the rating task in `r round(mean(clean$"Duration (in seconds)")/60)` minutes on average and were compensated with course credit. Of the participants, `r sum(clean$Version == 1)` saw version 1 of the instructions and `r sum(clean$Version == 2)` saw version 2. 
+
+
+**Materials**
+
+We selected `r nrow(words)` items (including nouns, adjectives and verbs) that span the following dimensions: valence (Warriner et al., 2013), concreteness (Brysbaert et al., 2014) and social interaction (Binder et al., 2016; Troche et al., 2017). We created two versions of the instructions to assess whether wording influenced participants’ understanding of the instructions and their ratings. In version 1, socialness was defined as the degree to which a word’s meaning has a social quality, while in version 2 it was defined as the degree to which a word’s meaning has social relevance. The rest of the instructions and examples were identical in the two versions. 
+
+
+```{r reliability, include = FALSE}
+
+# prepare data
+reliability_data <- ratings %>% dplyr::select(!Version) %>% t() %>% as.data.frame() # participants on columns
+
+# Split-half reliability
+splithalf_rel <- splithalf.r(reliability_data, sims = 100, seed = 2, graph = FALSE)
+ 
+# compute intraclass correlation coefficient - two-way random effects model
+icc_rel <- ICC(reliability_data)
+
+ # only version 1
+  reliability_data1 <- ratings %>% filter(Version == 1) %>% dplyr::select(!Version) %>% t() %>% as.data.frame()
+  splithalf_rel1 <- splithalf.r(reliability_data1, sims = 100, seed = 2, graph = FALSE)
+  icc_rel1 <- ICC(reliability_data1)
+  
+  # only version 2
+  reliability_data2 <- ratings %>% filter(Version == 2) %>% dplyr::select(!Version) %>% t() %>% as.data.frame()
+  splithalf_rel2 <- splithalf.r(reliability_data2, sims = 100, seed = 2, graph = FALSE)
+  icc_rel2 <- ICC(reliability_data2)
+```
+
+**Reliability**
+
+We examined the reliability of the ratings by computing the split half reliability for the 60 words. We found a mean Spearman-Brown corrected split-half reliability of `r round(splithalf_rel[3], digits = 2)` (*SD* = `r round(splithalf_rel[4], digits = 2)`) across 100 random splits, suggesting high reliability. In addition, we assessed inter-rater reliability by computing the two-way random-effects intra-class correlation coefficient (ICC) based on absolute agreement. We found an ICC(2,1) = `r round(icc_rel$results[2,2], digits = 2)`, 95%CI [`r round(icc_rel$results[2,7], digits = 2)`, `r round(icc_rel$results[2,8], digits = 2)`] suggesting poor to moderate reliability of individual ratings and an ICC(2, `r ncol(reliability_data)`) = `r round(icc_rel$results[5,2], digits = 2)`, 95%CI [`r round(icc_rel$results[5,7], digits = 2)`, `r round(icc_rel$results[5,8], digits = 2)`] suggesting excellent reliability of the average ratings of `r nrow(clean)` raters. Moreover, an ICC of `r round(icc_rel2$results[5,2], digits = 2)`, 95%CI [`r round(icc_rel2$results[5,7], digits = 2)`, `r round(icc_rel2$results[5,8], digits = 2)`] suggested that the average ratings of `r sum(clean$Version == 2)` raters who saw the instructions subsequently used in the main experiment (version 2) were highly reliable. 
+
+
+```{r summary statistics by version, include = FALSE}
+
+# Compute SUMMARY STATISTICS by instruction version
+sum_stat_12 <- ratings %>% group_by(Version) %>% descr(stats = "common", order = "preserve", transpose = TRUE)
+
+# Compute SUMMARY STATISTICS across instruction versions
+sum_stat <- ratings %>% select(!Version) %>% descr(stats = "common", order = "preserve", transpose = TRUE) %>% rownames_to_column("Word_ID_rating")
+  # format & save
+sum_stat <- left_join(words, sum_stat, by = "Word_ID_rating")
+sum_stat <- sum_stat %>% select(!Word_ID_rating, !Word_ID_rationale)
+#write_csv(sum_stat, "Data/Pilot_ratings_summary.csv")
+
+socialness <- sum_stat %>% select(Word, Mean, Std.Dev)
+colnames(socialness)[3] <- "SD"
+write_csv(socialness, "Data/PILOT_Socialness_mean_ratings.csv")
+
+```
+
+```{r visualize mean ratings, include = TRUE, echo = FALSE, fig.width=15, fig.height=4}
+
+# visualize mean socialness scores for 60 words in descending order based on mean
+fig1 <- ggplot(socialness, aes(x = reorder(Word, -Mean), y = Mean)) + 
+  geom_pointrange(aes(ymin = Mean-SD, ymax = Mean+SD), colour = "plum4") + 
+  theme_light() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 14)) +
+  labs(x = "", y ="Socialness", title = "Mean Socialness Ratings for 60 Words") + 
+ scale_y_continuous(breaks = c(1, 2, 3, 4, 5, 6, 7))
+ggsave('Socialness_mean_ratings.png', width = 15, height = 4) 
+fig1
+```
+
+```{r effect of instruction version, include = FALSE}
+
+# Testing independence of version and instruction unerstanding
+corsstab <- table(clean$Instruct_understand, clean$Version)
+
+# Chi square test
+  chisq <- chisq.test(corsstab)
+# Fishers exact test
+  fisher.test(corsstab)
+
+# correlation between mean socialness ratings of version 1 and those of version 2
+version_corr <- cor.test(sum_stat_12$`Version = 1`$Mean, sum_stat_12$`Version = 2`$Mean)
+
+```
+**Understanding of instructions**
+
+`r round(sum(clean$Instruct_understand == 'Moderately well')*100/nrow(clean), digits = 2)`% reported understanding the instructions moderately well, `r round(sum(clean$Instruct_understand == 'Very well')*100/nrow(clean), digits = 2)`% very well and `r round(sum(clean$Instruct_understand == 'Extremely well')*100/nrow(clean), digits = 2)`% extremely well. 
+
+**The effect of instruction version**
+
+A Pearson’s Chi-square test of independence suggested that self-reported understanding of the instructions did not depend on the version of the instructions *χ²* (`r chisq$parameter`, N = `r nrow(clean)`) = `r round(chisq$statistic, digits = 2)`, *p* = `r round(chisq$p.value, digits = 2)`). There was a strong positive correlation between mean socialness scores for the two instruction versions (*r* = `r round(version_corr$estimate, digits = 2)`, *p* <.001, *R2* = `r round(version_corr$estimate^2, digits = 2)`). Moreover, the reliability was comparable for the two versions, with a mean Spearman-Brown corrected split-half reliability of `r round(splithalf_rel1[3], digits = 2)` (*SD* = `r round(splithalf_rel1[4], digits = 2)`) for version 1 and `r round(splithalf_rel2[3], digits = 2)` (*SD* = `r round(splithalf_rel2[4], digits = 2)`) for version 2 (across 100 random splits). Therefore, we concluded that the wording did not significantly influence raters’ responses.
+
+
+```{r format & save verbal explanations, include = FALSE}
+
+# verbal explanations only
+  #version 1
+verbal_1 <- raw1 %>%
+  dplyr::select(Progress,  ends_with("_R_Q2"), P_Q1) %>% # select columns of interest
+  filter(Progress == 100) %>% # only keep data from participants who completed the experiment
+  dplyr::select(!Progress) %>%
+  replace_with_na_all(condition = ~.x == -99) %>% # record missing responses as NA 
+  mutate_all(as.character) %>%
+  pivot_longer(1:61, names_to="Word_ID_rationale", values_to="Rationale") %>%
+  drop_na()
+verbal_1$Version <- "1"
+  #version 2
+verbal_2 <- raw2 %>%
+  dplyr::select(Progress,  ends_with("_R_Q2"), P_Q1) %>% # select columns of interest
+  filter(Progress == 100) %>% # only keep data from participants who completed the experiment
+  dplyr::select(!Progress) %>%
+  replace_with_na_all(condition = ~.x == -99) %>% # record missing responses as NA 
+  mutate_all(as.character) %>%
+  pivot_longer(1:61, names_to="Word_ID_rationale", values_to="Rationale") %>%
+  drop_na()
+verbal_2$Version <- "2"
+  #combine & format
+verbal <- rbind(verbal_1, verbal_2)
+verbal <- verbal[order(verbal$Word_ID_rationale),]
+verbal <- left_join(verbal, words, by = "Word_ID_rationale")
+verbal$Word[441:474] <- "Explain_instructions"
+verbal <- left_join(verbal, socialness, by = "Word")
+verbal <- verbal %>% dplyr::select("Word", "Mean", "Rationale", "Version")
+colnames(verbal)[2] <- "Overall_mean_rating"
+colnames(verbal)[4] <- "Instruction_version"
+
+# save rating rationale
+verbal_ratings <- drop_na(verbal)
+write_csv(verbal_ratings, "Data/Ratings_rationale.csv")
+
+# save explanations of instructions
+verbal_instructions <- verbal %>% filter(Word == "Explain_instructions") %>% select("Rationale", "Instruction_version")
+colnames(verbal_instructions)[1]<- "Explain_instructions"
+write_csv(verbal_ratings, "Data/Instructions_explanations.csv")
+
+```
