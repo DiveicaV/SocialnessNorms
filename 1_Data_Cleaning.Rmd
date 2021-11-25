@@ -1,0 +1,311 @@
+---
+title: "Socialness Ratings: Data Cleaning"
+Author: "Veronica Diveica"  
+output:
+  word_document: default
+---
+
+<!-- Session Info -->
+
+<!-- R version 3.6.1 (2019-07-05) -->
+<!-- Platform: x86_64-apple-darwin15.6.0 (64-bit) -->
+<!-- Running under: macOS Mojave 10.14.6, RStudio 1.2.5001 -->
+
+<!-- Locale: en_GB.UTF-8 / en_GB.UTF-8 / en_GB.UTF-8 / C / en_GB.UTF-8 / en_GB.UTF-8 -->
+
+<!-- Package version: -->
+<!--   askpass_1.1        assertthat_0.2.1   backports_1.1.5    base64enc_0.1-3    BH_1.69.0.1        blob_1.2.1         -->
+<!--   broom_0.5.6        callr_3.5.1        cellranger_1.1.0   checkmate_2.0.0    cli_2.5.0          clipr_0.7.0        -->
+<!--   codetools_0.2-16   colorspace_2.0-1   compiler_3.6.1     cpp11_0.2.7        crayon_1.4.1       curl_4.3           -->
+<!--   data.table_1.13.6  DBI_1.1.0          dbplyr_1.4.4       digest_0.6.27      dplyr_1.0.6        ellipsis_0.3.2     -->
+<!--   evaluate_0.14      fansi_0.5.0        farver_2.1.0       forcats_0.5.1      fs_1.4.1           generics_0.1.0     -->
+<!--   ggplot2_3.3.3      glue_1.4.2         graphics_3.6.1     grDevices_3.6.1    grid_3.6.1         gridExtra_2.3      -->
+<!--   gtable_0.3.0       haven_2.3.1        highr_0.8          hms_0.5.3          htmltools_0.4.0    httr_1.4.1         -->
+<!--   isoband_0.2.4      janitor_2.1.0      jsonlite_1.7.2     knitr_1.25         labeling_0.4.2     lattice_0.20-38    -->
+<!--   lifecycle_1.0.0    lubridate_1.7.9    magick_2.6.0       magrittr_2.0.1     markdown_1.1       MASS_7.3.51.4      -->
+<!--   Matrix_1.2.17      matrixStats_0.56.0 methods_3.6.1      mgcv_1.8.28        mime_0.7           modelr_0.1.8       -->
+<!--   munsell_0.5.0      naniar_0.6.0       nlme_3.1-140       openssl_1.4.1      pander_0.6.3       pillar_1.6.1       -->
+<!--   pkgconfig_2.0.3    plyr_1.8.4         prettyunits_1.1.1  processx_3.4.5     progress_1.2.2     pryr_0.1.4         -->
+<!--   ps_1.5.0           purrr_0.3.4        R6_2.5.0           rapportools_1.0    RColorBrewer_1.1.2 Rcpp_1.0.6         -->
+<!--   readr_1.3.1        readxl_1.3.1       rematch_1.0.1      reprex_0.3.0       reshape_0.8.8      reshape2_1.4.3     -->
+<!--   rlang_0.4.11       rmarkdown_1.16     rstudioapi_0.13    rvest_0.3.5        scales_1.1.1       selectr_0.4.2      -->
+<!--   snakecase_0.11.0   splines_3.6.1      stats_3.6.1        stringi_1.6.2      stringr_1.4.0      summarytools_0.9.8 -->
+<!--   sys_3.3            tcltk_3.6.1        tibble_3.1.2       tidyr_1.1.3        tidyselect_1.1.1   tidyverse_1.3.0    -->
+<!--   tinytex_0.16       tools_3.6.1        UpSetR_1.4.0       utf8_1.2.1         utils_3.6.1        vctrs_0.3.8        -->
+<!--   viridis_0.5.1      viridisLite_0.4.0  visdat_0.5.3       whisker_0.4        withr_2.4.2        xfun_0.10          -->
+<!--   xml2_1.3.2         yaml_2.2.0   -->
+
+**Data Cleaning Procedure - Exclusion Criteria**
+
+-	completion time less than 3 SDs below the mean completion time 
+-	responded to less that 33% of the ratings task (i.e., rated less than 132 words) 
+-	responded with the same score for 25 (or more) stimuli in a row (we have 25 words per page) 
+-	responded with “I don’t know the meaning of this word” to more than 25 % of items (n = 100 out of 400 words) 
+-	correlation with the control words below .20
+-	correlation with the mean of the ratings of all other participants below 0.1
+-	items rated as “I don’t know the meaning of this word” by more than 15% of raters
+
+
+```{r load libraries, include=FALSE}
+library(tidyverse)
+library(naniar)
+library(janitor)
+library(data.table)
+library(summarytools)
+```
+
+```{r read data, include=FALSE}
+#load csv
+data <- read_csv("Data/Raw/All_data.csv") # raw data (including metadata, demographics, practice items)
+ratings <- read_csv("Data/Raw/All_ratings_only.csv") # raw ratings
+order <- read_csv("Data/Raw/Presentation_order_all.csv") # the subject-specific item presentation order
+items <- read_csv("Data/Raw/QID_to_word.csv") # list of words corresponding to each question ID
+cdata <- read_csv("Data/Raw/Control_words_pilot_ratings.csv") # mean socialness ratings for control words based from the pilot study
+
+```
+
+```{r load hasConsecutive function, include=FALSE}
+# set up function to check for lack of variation in consecutive ratings
+hasConsecutive <- function(x, n) {
+  consec <- 1
+  for(i in 2:length(x)) {
+    if(x[i] == x[i-1]) {
+      consec <- consec + 1
+    } else {
+      consec <- 1
+    }
+    if(consec == n)
+      return(TRUE)
+  }
+  return(FALSE)
+}
+```
+
+```{r consecutive incomplete unknown responses check, include=FALSE}
+#prepare data
+  #transpose ratings dataframe
+ratings_t <- transpose(ratings)
+rownames(ratings_t) <- colnames(ratings)
+ratings_t <- row_to_names(ratings_t, 1)
+  #transpose order dataframe and rename columns
+order_t <- transpose(order)
+order_t <- row_to_names(order_t, 1)
+
+#Create empty data frame to save results of loop
+consecutive <-setNames(data.frame(matrix(ncol = 4, nrow = nrow(data))), c("Participant", "Twentyfive_plus", "Incomplete", "Do_not_know"))
+
+#Loop to check for completion and if there are 25 in a row consecutive same responses
+for (k in 1:nrow(ratings)) {
+#Create sorted ratings list for each participant by presentation order
+pptorder <- as.vector(order_t[,k])
+ppt <- colnames(ratings_t)[k]
+pptrate <- ratings_t %>% select(ppt)
+ppt_new <- subset(pptrate, rownames(pptrate) %in% pptorder)
+ppt_new_ordered <-ppt_new[order(match(rownames(ppt_new), pptorder)), , drop = FALSE]
+#Save consecutive function results, ppt number and % incomplete to results data frame
+consecutive[k, 2] <- hasConsecutive(ppt_new_ordered[,1], 25)#check ratings column for 25 consecutive responses in a row and save into results data frame
+consecutive[k, 1] <- ppt#save participant number into results dataframe
+ppt_new_ordered[,1] <- as.numeric(as.character(ppt_new_ordered[,1]))
+consecutive[k,3] <- length(which(ppt_new_ordered[,1] == -99))/nrow(ppt_new_ordered) #save percent of missing responses into results
+consecutive[k,4] <- length(which(ppt_new_ordered[,1] == 8))/nrow(ppt_new_ordered)#save percent of I don't know responses into results dataframe
+}
+
+#Create key to remove participants based on exclusion criteria & get excluded participants response IDs
+remove_25 <- consecutive[ which(consecutive$Twentyfive_plus==TRUE),]
+remove_25 <- remove_25$Participant
+remove_incomplete <- consecutive[which(consecutive$Incomplete > .77),]
+remove_incomplete <- remove_incomplete$Participant
+remove_donotknow <- consecutive[which(consecutive$Do_not_know > .25),]
+remove_unknown <- remove_donotknow$Participant
+
+#Create vector of response IDs to exclude
+exclusions <- c(remove_incomplete, remove_25, remove_unknown) # 25 exclusions based on these criteria
+
+# exclude data from particiants based on consecutive, don't know and incomplete checks
+ratings_trimmed <- ratings %>% 
+  filter(!ResponseId %in% exclusions)
+```
+
+```{r extract control words and check correlation of each participant with pilot ratings, include=FALSE}
+#prepare data
+ratings_trimmed <- ratings_trimmed %>% 
+  replace_with_na_all(condition = ~.x == -99) %>% 
+  replace_with_na_all(condition = ~.x == 8)
+
+#extract control word ratings
+ratings_control <- ratings_trimmed %>% 
+  select(ResponseId, starts_with("QID_C"))
+ratings_control_t <- as.data.frame(t(ratings_control))
+ratings_control_t <- ratings_control_t %>% row_to_names(row_number = 1)
+
+# prepare data from pilot study
+cdata <- left_join(cdata, items, by = "Word") # add word ID to pilot data
+controls <- cdata %>% select("Word_ID", "Mean")
+
+#Create empty data frame to save results of loop
+control_check <- setNames(data.frame(matrix(ncol = 2, nrow = nrow(ratings_control))), c("ResponseID", "Correlation"))
+
+#loop to correlate with pilot ratings
+for (k in 1:ncol(ratings_control_t)) {
+control_check[k, 1] <- colnames(ratings_control_t[k])#save participant ID into results dataframe
+pptcontrols <- as.data.frame(ratings_control_t[,k]) #Get control word ratings for each participant
+  pptcontrols <- rownames_to_column(pptcontrols, "Word_ID")
+  colnames(pptcontrols)[2] <- "Rating"
+pptcontrols$Rating <- as.numeric(as.character(pptcontrols$Rating))
+corr_data <- left_join(pptcontrols, controls, by = "Word_ID")
+control_check[k,2] <- cor(corr_data$Rating, corr_data$Mean, use = "complete.obs")#save correlation to data frame
+}
+
+#Create key to remove participants based on control correlation exclusion criterion and get excluded participants response ID
+control_check$Exclude <- control_check$Correlation < 0.2 
+remove_control <- control_check[ which(control_check$Exclude==TRUE),] # 36 exclusions based on this criterion
+remove_control <- remove_control$ResponseID 
+
+#Create vector of response IDs to exclude
+exclusions <- c(exclusions, remove_control) # 61 exclusions overall
+
+# exclude data from particiants based on control check
+ratings_trimmed <- ratings_trimmed %>% 
+  filter(!ResponseId %in% exclusions)
+
+```
+
+
+
+
+```{r  adjusted person-total correlation check& exclusions, include=FALSE}
+#prepare data
+ratings_trimmed_t <- as.data.frame(t(ratings_trimmed))
+ratings_trimmed_t <- row_to_names(ratings_trimmed_t, row_number = 1)
+
+ #Create empty data frame to save results of loop
+person.total_check <- setNames(data.frame(matrix(ncol = 2, nrow = nrow(ratings_trimmed))), c("ResponseID", "Correlation"))
+
+#loop to compute adjusted person - total correlations
+for(k in 1:ncol(ratings_trimmed_t)){
+  person.total_check[k, 1] <- colnames(ratings_trimmed_t[k]) #save participant into results dataframe
+  # create dataframe with participant's ratings
+  ppt_ratings <- as.data.frame(ratings_trimmed_t[,k])
+  ppt_ratings <- ppt_ratings %>% rownames_to_column("Word_ID")
+  colnames(ppt_ratings)[2] <- "Rating"
+  ppt_ratings$Rating <- as.numeric(as.character(ppt_ratings$Rating))
+  # create daframe with ratings from all other participants
+  other_ratings <- ratings_trimmed %>% filter(!ResponseId %in% colnames(ratings_trimmed_t[k]))
+  mean_other <- descr(other_ratings, stats = c("mean", "sd"), order = "preserve", transpose = TRUE)
+  mean_other <- rownames_to_column(mean_other, "Word_ID")
+  #compute & save correlation between participant's ratings and the mean of all other ratings
+  corr_data <- left_join(ppt_ratings, mean_other, by = "Word_ID")
+  person.total_check[k,2] <- cor(corr_data$Rating, corr_data$Mean, use = "complete.obs")
+}
+
+# #Create key to remove participants based on correlation exclusion criteria and participants to recode
+# person.total_check$Exclude <- person.total_check$Correlation < 0.1 
+person.total_check <- read_csv("Data/28.07.21_PersonTotalCheck.csv")
+remove_corr.total <- person.total_check[ which(person.total_check$Exclude==TRUE),]
+remove_corr.total <- remove_corr.total$ResponseID  #Get excluded participant response ids
+# Create vector of all IDs to exclude
+all_exclusions <- c(exclusions, remove_corr.total)
+
+  
+# exclude data from particiants based on person total check
+ratings_clean <- ratings_trimmed %>% 
+  filter(!ResponseId %in% all_exclusions)
+
+```
+
+```{r format and save clean data for all words, include=FALSE}
+
+# format clean data file
+ratings_clean <- as.data.frame(t(ratings_clean))
+ratings_clean <- ratings_clean %>% 
+  row_to_names(row_number = 1) %>% 
+  rownames_to_column("Word_ID")
+ratings_clean <- left_join(ratings_clean, items, by = "Word_ID")
+ratings_clean <- ratings_clean %>%
+  column_to_rownames("Word") %>%
+  select(starts_with("R_"))
+ratings_clean <- as.data.frame(t(ratings_clean))
+ratings_clean <- rownames_to_column(ratings_clean, var = "ResponseId")
+
+#save clean ratings 
+write.csv(ratings_clean, "Data/Preprocessed/Ratings_clean_all_words.csv", row.names = FALSE)
+
+#save clean data (including metadata, demographics, practice trials)
+data_clean <- data %>% 
+  filter(!ResponseId %in% all_exclusions)
+write.csv(data_clean,"Data/Preprocessed/Data_clean_all_words.csv", row.names = FALSE)
+
+```
+
+
+```{r dont know check, include=FALSE}
+# prepare data
+data_final <- data_clean %>% 
+  select(ResponseId, starts_with("QID")) %>%
+  replace_with_na_all(condition = ~.x == -99) %>%
+  column_to_rownames("ResponseId")
+
+#Create empty data frame to save results of loop
+word.dont.know_check <- setNames(data.frame(matrix(ncol = 4, nrow = ncol(data_final))), c("Word_ID", "Ratings_count" ,"Unknowns", "%Unknowns"))
+
+# loop to calculate % unknowns per word
+for (k in 1:ncol(data_final)) {
+word.dont.know_check[k,1] <- colnames(data_final)[k]
+word.dont.know_check[k,2] <- colSums(!is.na(data_final[k])) # count no. of raters per word
+word.dont.know_check[k,3] <- length(which(data_final[,k] == 8)) # count no of don't know responses
+word.dont.know_check[k,4] <- 100*word.dont.know_check[k,3]/ word.dont.know_check[k,2]# calculate percentage of don't know responses 
+}
+#Create key to remove words based on % unknowns
+word.dont.know_check$Exclude <- word.dont.know_check$`%Unknowns` > 15 
+word.dont.know_check <- left_join(word.dont.know_check, items, by = "Word_ID")
+# Generate list of words to exclude
+remove_words <- word.dont.know_check[ which(word.dont.know_check$Exclude==TRUE),]
+remove_words <- remove_words$Word_ID  # 560 words excluded based on this criterion
+
+# Remove words based on % unknowns 
+data_final <- as.data.frame(t(data_final))
+data_final <- data_final %>% 
+  rownames_to_column("Word_ID") %>%
+  filter(!Word_ID %in% remove_words) # 8388 words included in final dataset
+
+# format final list of words & ratings
+data_final <- left_join(data_final, items, by = "Word_ID")
+data_final <- data_final %>% select(Word, starts_with("R_"))
+data_final <- as.data.frame(t(data_final))
+data_final <- data_final %>%
+  row_to_names(row_number = 1) %>%
+  rownames_to_column("ResponseId")
+
+# save final list (only includes participants and words that survived all the checks)
+write_csv(data_final, "Data/Preprocessed/Ratings_FINAL.csv") # this file contains 'don't know the emaning of the word' response coded as 8
+
+
+```
+
+
+```{r count observations, include=FALSE}
+
+# count no. of observations before data cleaning (including don't know)
+ratings <- ratings %>% column_to_rownames("ResponseId") %>% replace_with_na_all(condition = ~.x == -99)
+all_obs <- sum(!is.na(ratings))
+
+# count no. of observations after data cleaning (including don't know)
+word.dont.know_check_clean <- word.dont.know_check %>% 
+  filter(!Word_ID %in% remove_words)
+obs <- sum(word.dont.know_check_clean$Ratings_count) # count no. of total obs
+unknowns <- sum(word.dont.know_check_clean$Unknowns) # count no of don't know responses
+
+# Count no. of words with at least 20 valid ratings (excluding control words)
+word.dont.know_check_clean$Valid_ratings <- word.dont.know_check_clean$Ratings_count-word.dont.know_check_clean$Unknowns #calculate no of valid ratings per word
+count_valid_20 <- length(which(word.dont.know_check_clean$Valid_ratings > 19)) # Count no. of words with at least 20 valid ratings
+  count_valid_20_100 <- 100*count_valid_20/nrow(word.dont.know_check_clean) # 91.83 %
+word.dont.know_check_clean <- word.dont.know_check_clean %>% 
+  filter(!Word_ID %in% controls$Word_ID) # exclude control words
+
+```
+
+
+**Data cleaning**
+
+In total, we collected `r format(all_obs, big.mark = ",")` observations. The data cleaning pipeline involved sequentially implementing several techniques consistent with recommendations for identifying careless or insufficient effort responders (Curran, 2016) and computer-generated random responding (Dupuis et al., 2019), as well as other data cleaning procedures used in previous word norming studies (Brysbaert et al., 2014; Pexman et al., 2019; Warriner et al., 2013). First, we removed data from participants if they completed less than 33% of the ratings task (n = `r length(remove_incomplete)`), responded with “I don’t know the meaning of this word” for more than 25% of items (n = `r length(remove_unknown)`) and provided the same rating for more than 25 words in a row (n = `r length(remove_25)`). Next, we examined each participant’s ratings of the 30 control words and generated correlations with the mean ratings of those words obtained in the pilot study. We removed data from `r length(remove_control)` participants with a correlation coefficient less than .20. We then computed the correlation between each participant’s ratings and the mean ratings of all other participants. We deleted data from `r length(remove_corr.total)` participants with a correlation coefficient less than .10. Finally, if more than 15% of raters reported not knowing a particular word, we removed those words from the analyses reported below. This led to the exclusion of `r length(remove_words)` words. The final dataset comprised of `r format(ncol(data_final)-1, big.mark = ",")` words and `r format(obs, scientific = FALSE, big.mark = ",")` observations, of which `r format(unknowns, big.mark = ",")` were “I don’t know the meaning of this word” responses. Not taking into account the control words rated by all participants, each word in the final dataset had `r round(mean(word.dont.know_check_clean$Valid_ratings),digits = 2)` valid ratings on average (*SD* = `r round(sd(word.dont.know_check_clean$Valid_ratings),digits = 2)`), ranging from `r min(word.dont.know_check_clean$Valid_ratings)` to `r max(word.dont.know_check_clean$Valid_ratings)` ratings. Overall, `r format(count_valid_20, big.mark = ",")` (`r round(count_valid_20_100,digits = 2)`%) words had at least 20 valid ratings. 
+

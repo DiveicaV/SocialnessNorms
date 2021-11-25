@@ -1,0 +1,661 @@
+---
+title: 'Socialness Ratings: Analyses'
+author: "Veronica Diveica"
+output:
+  word_document: default
+This code runs correlations, regression models and generates all tables and figures reported in the associated article:
+- zero-order correlations between socialness and other lexical and semantic variables
+- hierarchical regression analyses for outcome variables: LDT RT and Accuracy (English
+    Lexicon Project)
+- hierarchical regression analyses for outcome variables: Recognition RT and Accuracy
+    (English Crowdsourcing Project)
+
+# Session Information:
+# R version 3.6.1 (2019-07-05)
+# Platform: x86_64-apple-darwin15.6.0 (64-bit)
+# Running under: macOS Mojave 10.14.6, RStudio 1.2.5001
+# 
+# Locale: en_GB.UTF-8 / en_GB.UTF-8 / en_GB.UTF-8 / C / en_GB.UTF-8 / en_GB.UTF-8
+# 
+# Package version:
+#   abind_1.4-5              AICcmodavg_2.3-1         apaTables_2.0.8          arm_1.11.2               askpass_1.1             
+#   assertthat_0.2.1         backports_1.2.1          base64enc_0.1-3          BH_1.69.0.1              bitops_1.0-6            
+#   blob_1.2.1               bookdown_0.22            boot_1.3-22              broom_0.7.9.9000         callr_3.5.1             
+#   car_3.0-10               carData_3.0-4            caTools_1.17.1.2         cellranger_1.1.0         checkmate_2.0.0         
+#   cli_3.0.1                clipr_0.7.0              cluster_2.1.0            coda_0.19.4              codetools_0.2-16        
+#   colorspace_2.0-1         compiler_3.6.1           conquer_1.0.2            cowplot_1.0.0            cpp11_0.3.1             
+#   crayon_1.4.1             curl_4.3                 data.table_1.13.6        DBI_1.1.0                dbplyr_1.4.4            
+#   digest_0.6.27            dplyr_1.0.7              ellipsis_0.3.2           evaluate_0.14            fansi_0.5.0             
+#   farver_2.1.0             forcats_0.5.1            foreign_0.8-71           Formula_1.2-4            fs_1.4.1                
+#   generics_0.1.0           ggcorrplot_0.1.3         ggplot2_3.3.3            glue_1.4.2               goftest_1.2-2           
+#   gplots_3.1.1             graphics_3.6.1           grDevices_3.6.1          grid_3.6.1               gridExtra_2.3           
+#   gsl_1.9.10.3             gtable_0.3.0             gtools_3.9.2             gvlma_1.0.0.3            haven_2.3.1             
+#   highr_0.9                Hmisc_4.5-0              hms_0.5.3                htmlTable_2.2.1          htmltools_0.5.1.1       
+#   htmlwidgets_1.5.1        httr_1.4.1               isoband_0.2.4            jpeg_0.1-9               jsonlite_1.7.2          
+#   jtools_2.1.4             KernSmooth_2.23-15       knitr_1.33               labeling_0.4.2           lattice_0.20-38         
+#   latticeExtra_0.6-29      lavaan_0.6.9             lifecycle_1.0.0          lm.beta_1.5-1            lme4_1.1-26             
+#   lmSupport_2.9.13         lubridate_1.7.9          magrittr_2.0.1           maptools_1.1.1           markdown_1.1            
+#   MASS_7.3-51.4            Matrix_1.2-17            matrixcalc_1.0.5         MatrixModels_0.5.0       matrixStats_0.56.0      
+#   MBESS_4.8.0              methods_3.6.1            mgcv_1.8.28              mi_1.0                   mime_0.11               
+#   minqa_1.2.4              mnormt_1.5-5             modelr_0.1.8             munsell_0.5.0            mvtnorm_1.1.1           
+#   nlme_3.1-140             nloptr_1.2.2.2           nnet_7.3-12              nortest_1.0-4            numDeriv_2016.8.1.1     
+#   olsrr_0.5.3              OpenMx_2.19.6            openssl_1.4.1            openxlsx_4.2.3           pander_0.6.3            
+#   papaja_0.1.0.9997        parallel_3.6.1           pbivnorm_0.6.0           pbkrtest_0.5.1           pillar_1.6.2            
+#   pkgconfig_2.0.3          plyr_1.8.4               png_0.1-7                prettyunits_1.1.1        processx_3.4.5          
+#   progress_1.2.2           ps_1.5.0                 psych_2.1.6              purrr_0.3.4              pwr_1.3-0               
+#   quantreg_5.85            R6_2.5.0                 raster_3.4-13            RColorBrewer_1.1-2       Rcpp_1.0.6              
+#   RcppArmadillo_0.10.2.2.0 RcppEigen_0.3.3.9.1      RcppParallel_5.1.4       readr_1.3.1              readxl_1.3.1            
+#   rematch_1.0.1            reprex_0.3.0             reshape2_1.4.3           rio_0.5.26               rlang_0.4.11            
+#   rmarkdown_2.10           rmdfiltr_0.1.3           rpart_4.1-15             rpf_1.0.7                rstudioapi_0.13         
+#   rvest_0.3.5              scales_1.1.1             selectr_0.4.2            sem_3.1.11               semTools_0.5.5          
+#   sp_1.4-5                 SparseM_1.81             splines_3.6.1            StanHeaders_2.21.0.7     statmod_1.4.35          
+#   stats_3.6.1              stats4_3.6.1             stringi_1.7.3            stringr_1.4.0            survival_3.2-11         
+#   sys_3.3                  tibble_3.1.3             tidyr_1.1.3              tidyselect_1.1.1         tidyverse_1.3.0         
+#   tinytex_0.33             TMB_1.7.21               tools_3.6.1              unmarked_1.1.1           utf8_1.2.2              
+#   utils_3.6.1              vctrs_0.3.8              VGAM_1.1-5               viridis_0.5.1            viridisLite_0.4.0       
+#   whisker_0.4              withr_2.4.2              xfun_0.25                xml2_1.3.2               xtable_1.8-4            
+#   yaml_2.2.1               zip_2.2.0
+---
+
+```{r load packages, include=FALSE}
+library(tidyverse)
+library(papaja)
+library(ggcorrplot)
+library(cowplot)
+library(apaTables) # for creating APA formatted correlation tables
+library(lm.beta) # computes standardized beta coefficients
+library(olsrr) # used to calculate VIF & tolerance 
+library(lmSupport) # compares regression models and calculates delta R2
+library(jtools) # used to plot betas & calculate partial r2
+library(Hmisc) # for rcorr function
+library(ggExtra) # for ggmarginal function 
+```
+
+
+```{r data, include=FALSE}
+# input relevant data
+socialness <- read_csv("Data/Ratings_sum.stat.csv")
+  socialness <- socialness %>% select(Word, Mean)
+  names(socialness)[2] <- "Socialness"
+
+# OLD, PLD, Frequency, LDT RT & Accuracy
+ELP <- read_csv("Data/Other/ELP_Items.csv")
+ELP <- ELP %>% select(Word, OLD, PLD, LgSUBTLWF, I_Zscore, I_Mean_Accuracy)
+colnames(ELP)[4:6] <- c("Frequency", "LDT_zRT", "LDT_Accuracy")
+
+# Age of Acquisition
+  # AoA - rating
+aoa1 <- read_csv("Data/Other/Kuperman_2012_AoA.csv")
+aoa1 <- aoa1 %>% select(Word, Rating.Mean)
+colnames(aoa1)[2] <-"AoA.Rating"
+  # AoA - test
+aoa2 <- read_csv("Data/Other/Brysbaert & Biemiller 2017 test-based AoA measures.csv")
+aoa2 <- aoa2 %>% select(WORD, AoAtestbased)
+colnames(aoa2) <- c("Word","AoA.Test")
+aoa2 <- aggregate(aoa2$AoA.Test, by = list(aoa2$Word), FUN=min, na.rm = TRUE) # keep earlier AoA for homonyms
+colnames(aoa2) <- c("Word","AoA.Test")
+
+# Concreteness
+concreteness <- read_csv("Data/Other/Brysbaert2013_Concreteness.csv")
+concreteness <- concreteness %>% select(Word, Conc.M)
+colnames(concreteness)[2] <- "Concreteness"
+
+# Imageability 
+  # monosyllabic words
+imag1 <- read_csv("Data/Other/cortese2004_imageability.csv")
+imag1 <- imag1 %>% select(item, rating)
+colnames(imag1) <- c("Word", "Imageability")
+  # disyllabic words
+imag2 <- read_csv("Data/Other/Schock_2012_Imageability.csv")
+imag2 <- imag2 %>% select(item, `mean rating`)
+colnames(imag2) <- c("Word", "Imageability")
+  # combine mono & di
+imag <- full_join(imag1, imag2, by = "Word")
+imag <- unite(imag, "Imageability", Imageability.x:Imageability.y, na.rm = TRUE)
+rm(imag1, imag2)
+
+# Body-Object Interaction
+boi <- read_csv("Data/Other/Pexman_2019_BOI.csv")
+boi <- boi %>% select(Word, Mean)
+colnames(boi)[2] <- "BOI"
+
+# Sensory Experience Rating 
+ser <- read_csv("Data/Other/SER_Juhasz2013.csv")
+ser <- ser %>% select(Word, `Average SER`)
+colnames(ser)[2] <- "SER"
+
+# Emotion
+emotion <- read_csv("Data/Other/Warriner 2013 Emotion ratings.csv")
+emotion <- emotion %>% mutate(Valence_ext = abs(V.Mean.Sum - 5)) %>% # compute valence extremity
+  select(Word, Valence_ext, A.Mean.Sum, D.Mean.Sum) 
+colnames(emotion)[3:4] <- c("Arousal", "Dominance")
+
+# Semantic Diversity
+semD <- read_csv("Data/Other/Hoffman_2013_Semantic_diversity.csv")
+semD <- semD %>% select('!term', SemD)
+colnames(semD) <- c("Word", "SemanticDiversity")
+
+# English Crowdsourcing Project Vocabulary Test
+ECP <- read_csv("Data/Other/Mandera_2020_EnglishCrowdsourcingProject.csv")
+ECP <- ECP %>% select(spelling, zrt_mean, accuracy)
+colnames(ECP) <- c( "Word" ,"ECP_zRT", "ECP_Accuracy")
+
+# combine data
+data <- left_join(socialness, ELP, by = "Word")
+data <- left_join(data,aoa1, by = "Word")
+data <- left_join(data, aoa2, by = "Word")
+data <- left_join(data, concreteness, by = "Word")
+data <- left_join(data, imag, by = "Word")
+data <- left_join(data, boi, by = "Word")
+data <- left_join(data, ser, by = "Word")
+data <- left_join(data, emotion, by = "Word")
+data <- left_join(data, semD, by = "Word")
+data <- left_join(data, ECP, by = "Word")
+data$Length <- sapply(data$Word, nchar) # calculate word length
+data <- data %>% mutate(across(2:20, as.numeric))
+rm(ELP, aoa1, aoa2, concreteness, imag, boi, ser, emotion, semD, ECP)
+```
+
+```{r correlations, fig.height = 7, fig.width = 11, echo=FALSE, message=FALSE}
+# Relationship to other lexical and semantic dimensions
+# prepare data
+corr_data <- data %>% select(Socialness, Length, Frequency, OLD, PLD, AoA.Rating, AoA.Test, Concreteness, Imageability, BOI, SER, Valence_ext, Arousal, Dominance, SemanticDiversity)
+colnames(corr_data) <- c("Socialness", "Length", "Frequency", "OLD", "PLD", "AoA Rating", "AoA Test-based", "Concreteness", "Imageability", "BOI","SER", "Valence Extremity", "Arousal", "Dominance", "Semantic Diversity")
+
+# compute correlation matrix
+corr_results <- rcorr(as.matrix(corr_data), type = c("pearson"))
+
+# create correlation plot
+fig2 <- ggcorrplot(corr_results$r, p.mat = corr_results$P, type = "lower", legend.title = "Pearson r", lab = TRUE, outline.col = "white", colors = c("#6bd4ae", "white", "#7a6bd4"), sig.level = 0.01, insig = "blank", tl.cex = 12, tl.col = "black")
+
+#save figure
+ggsave("Figures/Correlations.tiff", height = 6.5, width = 10.5)
+ggsave("Figures/Correlations.png", height = 6.5, width = 10.5)
+
+# visualize corrplot
+fig2
+
+```
+
+
+```{r scatterplots, include = FALSE}
+# create scatterplots for supplementary figure
+
+sup1 <- ggplot(corr_data, aes(x=Socialness, y=Length)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) + 
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() + 
+      theme(text = element_text(size = 10)) + 
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7)) + 
+      labs(x = "Socialness", y ="Letter Length")
+
+sup1 <- ggMarginal(sup1, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup2 <- ggplot(corr_data, aes(x=Socialness, y=Frequency)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y ="Frequency") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))  
+sup2 <- ggMarginal(sup2, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup3 <- ggplot(corr_data, aes(x=Socialness, y=OLD)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y ="OLD") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))  
+sup3 <- ggMarginal(sup3, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup4 <- ggplot(corr_data, aes(x=Socialness, y=PLD)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y ="PLD") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))  
+sup4 <- ggMarginal(sup4, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup5 <- ggplot(corr_data, aes(x=Socialness, y=`AoA Rating`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y ="AoA Rating") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup5 <- ggMarginal(sup5, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup6 <- ggplot(corr_data, aes(x=Socialness, y=`AoA Test-based`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y ="Test-based AoA") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup6 <- ggMarginal(sup6, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup7 <- ggplot(corr_data, aes(x=Socialness, y=`Concreteness`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y = "Concreteness") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup7 <- ggMarginal(sup7, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup8 <- ggplot(corr_data, aes(x=Socialness, y=`Imageability`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y = "Imageability") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup8 <- ggMarginal(sup8, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup9 <- ggplot(corr_data, aes(x=Socialness, y=BOI)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y = "BOI") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup9 <- ggMarginal(sup9, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup10 <- ggplot(corr_data, aes(x=Socialness, y=SER)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y = "SER") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup10 <- ggMarginal(sup10, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup11 <- ggplot(corr_data, aes(x=Socialness, y=`Valence Extremity`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y = "Valence Extremity") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup11 <- ggMarginal(sup11, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup12 <- ggplot(corr_data, aes(x=Socialness, y=Arousal)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y = "Arousal") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup12 <- ggMarginal(sup12, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup13 <- ggplot(corr_data, aes(x=Socialness, y=Dominance)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y = "Dominance") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup13 <- ggMarginal(sup13, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup14 <- ggplot(corr_data, aes(x=Socialness, y=`Semantic Diversity`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y ="Semantic Diversity") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10))
+sup14 <- ggMarginal(sup14, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+# create scatterplot figure
+sup <- plot_grid(sup1,sup2,sup3,sup4,sup5,sup6,sup7,sup8,sup9,sup10,sup11,sup12,sup13,sup14, nrow = 5,  ncol = 3, axis = "l", align = "v")
+ggsave("Figures/Scatterplots.tiff", height = 7, width = 7)
+ggsave("Figures/Scatterplots.png", height = 7, width = 7)
+```
+
+**Figure 2**Correlations between socialness ratings and lexical-semantic dimensions. Only correlations significant at *p* < .01 are shown. The strength and direction of the correlation coefficients are indicated by the colour and the numerical values. For each variable of interest, the numbers of items in common with our socialness ratings are as follows:`r format(sum(!is.na(corr_data$Arousal)), big.mark = ",")` for valence, arousal and dominance; `r format(sum(!is.na(corr_data$Length)), big.mark = ",")` length, `r format(sum(!is.na(corr_data$Frequency)), big.mark = ",")` for frequency, `r format(sum(!is.na(corr_data$OLD)), big.mark = ",")` OLD, `r format(sum(!is.na(corr_data$PLD)), big.mark = ",")` for PLD, `r format(sum(!is.na(corr_data$"AoA Rating")), big.mark = ",")` for rating-based AoA, `r format(sum(!is.na(corr_data$"AoA Test-based")), big.mark = ", ")` for test-based AoA, `r format(sum(!is.na(corr_data$Concreteness)), big.mark = ",")` for concreteness, `r format(sum(!is.na(corr_data$Imageability)), big.mark = ",")` for imageability, `r format(sum(!is.na(corr_data$BOI)), big.mark = ",")` for BOI and `r format(sum(!is.na(corr_data$SER)), big.mark = ",")` for SER. SER = sensory experience rating; BOI = body-object interaction; AoA = age of acquisition; PLD = phonologic Levenshtein distance; OLD = orthographic Levenshtein distance. 
+
+
+**Correlations with Lexical and Semantic Properties**
+
+We examined the correlations between the socialness ratings and various lexical and semantic properties of the words (Figure 2). The lexical variables included letter length, orthographic Levenshtein distance (Yarkoni et al., 2008), phonological Levenshtein distance and frequency (log subtitle frequency; (Brysbaert & New, 2009)). The semantic variables included concreteness (Brysbaert et al., 2014), imageability (Cortese & Fugett, 2004; Schock et al., 2012), body-object interaction (Pexman et al., 2019), sensory experience ratings (Juhasz & Yap, 2012), valence extremity (i.e. the absolute value of the difference between the valence rating from 5, the neutral point on the scale (Warriner et al., 2013)), arousal (Warriner et al., 2013), dominance (Warriner et al., 2013), , rating-based age of acquisition (AoA) (Kuperman et al., 2012), and a test-based AoA measure derived from (Dale & O’Rourke, 1981) and updated by (Brysbaert & Biemiller, 2017). 
+
+These correlations revealed several interesting relationships that provide insight as to the nature of the word socialness measure (Figure 2; see Figure S1 for scatterplots). Socialness negatively correlated with concreteness (*r* = `r round(corr_results$r[8,1], digits = 2)`), imageability (*r* = `r round(corr_results$r[9,1], digits = 2)`), and BOI (*r* = `r round(corr_results$r[10,1], digits = 2)`), which suggests that words with less social relevance are associated with more embodied sensorimotor information. In contrast, socialness ratings positively correlated with valence extremity (*r* = `r round(corr_results$r[12,1], digits = 2)`), and arousal (*r* = `r round(corr_results$r[13,1], digits = 2)`), suggesting that social words tend to have more affective information. 
+
+
+```{r prepare LDT data, include = FALSE}
+
+# prepare data
+LDT_data <- data %>% select(Word, Length, Frequency, AoA.Rating, Socialness, Concreteness, Valence_ext, SemanticDiversity, LDT_zRT, LDT_Accuracy) %>% drop_na()
+
+# prepare descriptives for variables of interest supplementary table
+LDT_cor_tbl <- LDT_data 
+colnames(LDT_cor_tbl)[2:10] <- c("Length", "Frequency", "Age of Acquisition", "Socialness", "Concreteness", "Valence Extremity", "Semantic Diversity", "LDT zRT", "LDT Accuracy")
+LDT_cor_tbl <- apa.cor.table(LDT_cor_tbl)
+LDT_cor_tbl <- as.data.frame(LDT_cor_tbl$table.body)
+LDT_cor_tbl$M <- as.numeric(as.character(LDT_cor_tbl$M)) 
+LDT_cor_tbl<- LDT_cor_tbl%>% filter(!M==0)
+
+# mean-center predictors
+LDT_data  <- LDT_data  %>% mutate(across(c("Length", "Frequency", "AoA.Rating", "Socialness", "Concreteness" , "Valence_ext", "SemanticDiversity"), ~ scale(.x, scale = FALSE)))
+
+```
+
+```{r LDT latencies regression, include = FALSE}
+
+# specify regression models
+LDT.RT_step1 <- lm(LDT_zRT ~ Length + Frequency + AoA.Rating, LDT_data)
+LDT.RT_step2 <- lm(LDT_zRT ~ Length + Frequency + AoA.Rating + Socialness + Concreteness + Valence_ext + SemanticDiversity, LDT_data)
+# compare models
+modelCompare(LDT.RT_step1, LDT.RT_step2)
+
+# Check Collinearity
+LDT.RT_VIF <- ols_vif_tol(LDT.RT_step2)
+
+# Compute diagnostics
+#calculate sr2
+LDT.RT_step1_bweights <-summ(LDT.RT_step1, digits = 3, part.corr = TRUE)
+LDT.RT_step1_sr2 <- as.data.frame(LDT.RT_step1_bweights$coeftable)
+LDT.RT_step1_sr2 <- LDT.RT_step1_sr2 %>% 
+  select(Est., part.r) %>% 
+  na.omit() %>% 
+  mutate(sr2 = part.r^2)
+LDT.RT_step1_sr2 <- as.character(round(LDT.RT_step1_sr2$sr2, 3))
+LDT.RT_bweights <-summ(LDT.RT_step2, digits = 3, part.corr = TRUE)
+LDT.RT_sr2 <- as.data.frame(LDT.RT_bweights$coeftable)
+LDT.RT_sr2 <- LDT.RT_sr2 %>% 
+  select(Est., part.r) %>% 
+  na.omit() %>% 
+  mutate(sr2 = part.r^2)
+LDT.RT_sr2 <- as.character(round(LDT.RT_sr2$sr2, 3))
+# calculate standardized betas
+  LDT.RT_step1 <- lm.beta(LDT.RT_step1)
+  LDT.RT_step2 <- lm.beta(LDT.RT_step2)
+
+
+# prepare data for results table 
+#Make Variables column for table
+tbl3_pred <- setNames(data.frame(matrix(ncol = 1, nrow = 14)), c("Predictor"))
+tbl3_pred$Predictor <- c("Step1","Intercept", "Length", "Frequency", "Age of Acquisition", "Step2","Intercept", "Length", "Frequency", "Age of Acquisition", "Socialness", "Concreteness", "Valence Extremity", "Semantic Diversity")
+# step 1 values
+t1_b1 <-c("", round(summary(LDT.RT_step1)$coefficients[,1], digits = 3))
+t1_se1 <-c("", round(summary(LDT.RT_step1)$coefficients[,3], digits = 3))
+t1_t1 <-c("", round(summary(LDT.RT_step1)$coefficients[,4], digits = 2))
+t1_p1 <-c("", round(summary(LDT.RT_step1)$coefficients[,5], digits = 3))
+t1_sr21 <- c("","", LDT.RT_step1_sr2)
+t1_R21 <- c(round(summary(LDT.RT_step1)$adj.r.squared, digits = 2), "", "", "", "")
+t1_delta1 <- c("" , "", "", "", "")
+# step 2 values
+t1_b2 <-c("", round(summary(LDT.RT_step2)$coefficients[,1], digits = 3))
+t1_se2 <-c("", round(summary(LDT.RT_step2)$coefficients[,3], digits = 3))
+t1_t2 <-c("", round(summary(LDT.RT_step2)$coefficients[,4], digits = 2))
+t1_p2 <-c("", round(summary(LDT.RT_step2)$coefficients[,5], digits = 3))
+t1_sr22 <- c("","",LDT.RT_sr2)
+t1_R22 <- c(round(summary(LDT.RT_step2)$adj.r.squared, digits = 2), "", "", "", "", "", "", "", "")
+t1_delta2 <- c(round(modelCompare(LDT.RT_step1, LDT.RT_step2)$Delta, digits = 3), "", "", "", "", "", "", "", "")
+
+```
+
+
+```{r LDT accuracy regression, include = FALSE}
+
+# specify regression models
+LDT.ACC_step1 <- lm(LDT_Accuracy ~ Length + Frequency + AoA.Rating, LDT_data)
+LDT.ACC_step2 <- lm(LDT_Accuracy ~ Length + Frequency + AoA.Rating + Socialness + Concreteness + Valence_ext + SemanticDiversity, LDT_data)
+# compare models
+modelCompare(LDT.ACC_step1, LDT.ACC_step2)
+
+# Check Collinearity
+LDT.ACC_VIF <- ols_vif_tol(LDT.ACC_step2)
+
+# Compute diagnostics
+#calculate sr2
+LDT.ACC_step1_bweights <-summ(LDT.ACC_step1, digits = 3, part.corr = TRUE)
+LDT.ACC_step1_sr2 <- as.data.frame(LDT.ACC_step1_bweights$coeftable)
+LDT.ACC_step1_sr2 <- LDT.ACC_step1_sr2 %>% 
+  select(Est., part.r) %>% 
+  na.omit() %>% 
+  mutate(sr2 = part.r^2)
+LDT.ACC_step1_sr2 <- as.character(round(LDT.ACC_step1_sr2$sr2, 3))
+LDT.ACC_bweights <-summ(LDT.ACC_step2, digits = 3, part.corr = TRUE)
+LDT.ACC_sr2 <- as.data.frame(LDT.ACC_bweights$coeftable)
+LDT.ACC_sr2 <- LDT.ACC_sr2 %>% 
+  select(Est., part.r) %>% 
+  na.omit() %>% 
+  mutate(sr2 = part.r^2)
+LDT.ACC_sr2 <- as.character(round(LDT.ACC_sr2$sr2, 3))
+# calculate standardized betas
+  LDT.ACC_step1 <- lm.beta(LDT.ACC_step1) # get standardized betas
+  LDT.ACC_step2 <- lm.beta(LDT.ACC_step2) # get standardized betas
+
+# prepare data for results table 
+# step 1 values
+t2_b1 <-c("", round(summary(LDT.ACC_step1)$coefficients[,1], digits = 3))
+t2_se1 <-c("", round(summary(LDT.ACC_step1)$coefficients[,3], digits = 3))
+t2_t1 <-c("", round(summary(LDT.ACC_step1)$coefficients[,4], digits = 2))
+t2_p1 <-c("", round(summary(LDT.ACC_step1)$coefficients[,5], digits = 3))
+t2_sr21 <- c("","", LDT.ACC_step1_sr2)
+t2_R21 <- c(round(summary(LDT.ACC_step1)$adj.r.squared, digits = 2), "", "", "", "")
+t2_delta1 <- c("" , "", "", "", "")
+# step 2 values
+t2_b2 <-c("", round(summary(LDT.ACC_step2)$coefficients[,1], digits = 3))
+t2_se2 <-c("", round(summary(LDT.ACC_step2)$coefficients[,3], digits = 3))
+t2_t2 <-c("", round(summary(LDT.ACC_step2)$coefficients[,4], digits = 2))
+t2_p2 <-c("", round(summary(LDT.ACC_step2)$coefficients[,5], digits = 3))
+t2_sr22 <- c("","",LDT.ACC_sr2)
+t2_R22 <- c(round(summary(LDT.ACC_step2)$adj.r.squared, digits = 2), "", "", "", "", "", "", "", "")
+t2_delta2 <- c(round(modelCompare(LDT.ACC_step1, LDT.ACC_step2)$Delta, digits = 3), "", "", "", "", "", "", "", "")
+
+```
+
+```{r LDT regressions tables, echo = FALSE, message = FALSE, fig.width=10, fig.height=4}
+
+#Make Descriptives Table
+apa_table(LDT_cor_tbl, align = c("l", rep("c", 10)), caption = "Means, standard deviations and correlations of all variables of interest for the regression analysis predicting performance in the English Lexicon Project Lexical Decision Task (N = 6,926)", note = "M and SD are used to represent mean and standard deviation, respectively. LDT = lexical decision task; zRT = standardized reaction times. * indicates p < .05. ** indicates p < .01.", row.names = FALSE)
+
+#Make Results Table
+tbl3_1 <- data.frame(t1_b1, t1_se1, t1_t1, t1_p1, t1_sr21, t1_R21, t1_delta1)
+colnames(tbl3_1) <- c("b", "SE", "t", "p", "sr2", "R2", "∆R2")
+tbl3_2 <- data.frame(t1_b2, t1_se2, t1_t2, t1_p2, t1_sr22, t1_R22, t1_delta2)
+colnames(tbl3_2) <- c("b", "SE", "t", "p", "sr2", "R2", "∆R2")
+tbl3_3 <- data.frame(t2_b1, t2_se1, t2_t1, t2_p1, t2_sr21, t2_R21, t2_delta1)
+colnames(tbl3_3) <- c("b", "SE", "t", "p", "sr2", "R2", "∆R2")
+tbl3_4 <- data.frame(t2_b2, t2_se2, t2_t2, t2_p2, t2_sr22, t2_R22, t2_delta2)
+colnames(tbl3_4) <- c("b", "SE", "t", "p", "sr2", "R2", "∆R2")
+
+tbl_12 <- rbind(tbl3_1, tbl3_2)
+tbl_34 <- rbind(tbl3_3, tbl3_4)
+tbl3 <- cbind(tbl3_pred, tbl_12)
+tbl3 <- cbind(tbl3, tbl_34)
+row.names(tbl3) <- NULL
+
+apa_table(tbl3, caption = "Regression Coefficients from Item-Level Analyses Predicting Lexical Decision Task Latencies and Accuracy (N = 6,926)", note = "b represents unstandardized regression weights. SE represents the standard error of the regression weights. sr2 represents the semi-partial correlation squared. LDT lexical decision task. zRTs standardized reaction times. *p < .05; **p < .01; ***p < .001", stub_indents = list(c(2:5), c(7:14)))
+
+
+```
+
+
+
+There were `r format(nrow(LDT_data), big.mark = ",")` items for which we had values for all variables of interest in the analysis predicting LDT performance. Descriptive statistics and zero-order correlations between all variables of interest from this dataset are reported in supplementary Table S1. The statistical results are reported in Table 3 and the standardized coefficients are illustrated in Figure 3A. In this analysis, the control variables were all significant predictors of LDT latencies – RTs were faster for words that are shorter, more frequent and acquired earlier. There was significant improvement in model fit with the addition of the semantic variables, which collectively accounted for a further `r round(modelCompare(LDT.RT_step1, LDT.RT_step2)$Delta*100, digits = 2)`% of variance in LDT latencies. Of the semantic variables, only socialness and semantic diversity were significant predictors, with faster RTs for words with increased social relevance and those encountered in more semantically diverse contexts. A similar pattern of results was observed when predicting LDT accuracy. The control variables were all significant predictors, with better accuracy for words that are longer, more frequent and acquired earlier. There was significant improvement in model fit with the inclusion of the semantic variables, which accounted for an additional `r round(modelCompare(LDT.ACC_step1, LDT.ACC_step2)$Delta*100, digits = 2)`% of variance in LDT accuracy. Socialness and semantic diversity were the only significant semantic predictors – accuracy was higher for words with increased socialness and for those that are more semantically-diverse.
+
+```{r prepare ECP data, include = FALSE}
+
+# prepare data
+ECP_data <- data %>%
+  select(Word, Length, Frequency, AoA.Rating, Socialness, Concreteness, Valence_ext, SemanticDiversity, ECP_zRT, ECP_Accuracy) %>% drop_na()
+
+# prepare descriptives for variables of interest table
+ECP_cor_tbl <- ECP_data 
+colnames(ECP_cor_tbl)[2:10] <- c("Length", "Frequency", "Age of Acquisition", "Socialness", "Concreteness", "Valence Extremity", "Semantic Diversity", "Recognition zRT", "Recognition Accuracy")
+ECP_cor_tbl <- apa.cor.table(ECP_cor_tbl)
+ECP_cor_tbl <- as.data.frame(ECP_cor_tbl$table.body)
+ECP_cor_tbl$M <- as.numeric(as.character(ECP_cor_tbl$M)) 
+ECP_cor_tbl<- ECP_cor_tbl%>% filter(!M==0)
+
+# mean-center predictors
+ECP_data  <- ECP_data  %>% mutate(across(c("Length", "Frequency", "AoA.Rating", "Socialness", "Concreteness" , "Valence_ext", "SemanticDiversity"), ~ scale(.x, scale = FALSE)))
+```
+
+
+```{r ELP reaction times regression, include = FALSE}
+
+# specify regression models
+ECP.RT_step1 <- lm(ECP_zRT ~ Length + Frequency + AoA.Rating, ECP_data)
+  summary(ECP.RT_step1)
+ECP.RT_step2 <- lm(ECP_zRT ~ Length + Frequency + AoA.Rating + Socialness + Concreteness + Valence_ext + SemanticDiversity, ECP_data)
+  summary(ECP.RT_step2)
+# compare models
+modelCompare(ECP.RT_step1, ECP.RT_step2)
+
+# Check Collinearity
+ECP.RT_VIF <- ols_vif_tol(ECP.RT_step2)
+
+# Compute diagnostics
+#calculate sr2
+ECP.RT_step1_bweights <-summ(ECP.RT_step1, digits = 3, part.corr = TRUE)
+ECP.RT_step1_sr2 <- as.data.frame(ECP.RT_step1_bweights$coeftable)
+ECP.RT_step1_sr2 <- ECP.RT_step1_sr2 %>% 
+  select(Est., part.r) %>% 
+  na.omit() %>% 
+  mutate(sr2 = part.r^2)
+ECP.RT_step1_sr2 <- as.character(round(ECP.RT_step1_sr2$sr2, 3))
+ECP.RT_bweights <-summ(ECP.RT_step2, digits = 3, part.corr = TRUE)
+ECP.RT_sr2 <- as.data.frame(ECP.RT_bweights$coeftable)
+ECP.RT_sr2 <- ECP.RT_sr2 %>%
+  select(Est., part.r) %>%
+  na.omit() %>%
+  mutate(sr2 = part.r^2)
+ECP.RT_sr2 <- as.character(round(ECP.RT_sr2$sr2, 3))
+# calculate standardized betas
+  ECP.RT_step1 <- lm.beta(ECP.RT_step1)
+  ECP.RT_step2 <- lm.beta(ECP.RT_step2)
+
+# prepare data for results table 
+# step 1 values
+t3_b1 <-c("", round(summary(ECP.RT_step1)$coefficients[,1], digits = 3))
+t3_se1 <-c("", round(summary(ECP.RT_step1)$coefficients[,3], digits = 3))
+t3_t1 <-c("", round(summary(ECP.RT_step1)$coefficients[,4], digits = 2))
+t3_p1 <-c("", round(summary(ECP.RT_step1)$coefficients[,5], digits = 3))
+t3_sr21 <- c("","", ECP.RT_step1_sr2)
+t3_R21 <- c(round(summary(ECP.RT_step1)$adj.r.squared, digits = 2), "", "", "", "")
+t3_delta1 <- c("" , "", "", "", "")
+# step 2 values
+t3_b2 <-c("", round(summary(ECP.RT_step2)$coefficients[,1], digits = 3))
+t3_se2 <-c("", round(summary(ECP.RT_step2)$coefficients[,3], digits = 3))
+t3_t2 <-c("", round(summary(ECP.RT_step2)$coefficients[,4], digits = 2))
+t3_p2 <-c("", round(summary(ECP.RT_step2)$coefficients[,5], digits = 3))
+t3_sr22 <- c("","",ECP.RT_sr2)
+t3_R22 <- c(round(summary(ECP.RT_step2)$adj.r.squared, digits = 2), "", "", "", "", "", "", "", "")
+t3_delta2 <- c(round(modelCompare(ECP.RT_step1, ECP.RT_step2)$Delta, digits = 3), "", "", "", "", "", "", "", "")
+
+```
+
+
+```{r ECP accuracy regression, include = FALSE}
+
+# specify regression models
+ECP.ACC_step1 <- lm(ECP_Accuracy ~ Length + Frequency + AoA.Rating, ECP_data)
+ECP.ACC_step2 <- lm(ECP_Accuracy ~ Length + Frequency + AoA.Rating + Socialness + Concreteness + Valence_ext + SemanticDiversity, ECP_data)
+# compare models
+modelCompare(ECP.ACC_step1, ECP.ACC_step2)
+
+# Check Collinearity
+ECP.ACC_VIF <- ols_vif_tol(ECP.ACC_step2)
+
+# Compute diagnostics
+#calculate sr2
+ECP.ACC_step1_bweights <-summ(ECP.ACC_step1, digits = 3, part.corr = TRUE)
+ECP.ACC_step1_sr2 <- as.data.frame(ECP.ACC_step1_bweights$coeftable)
+ECP.ACC_step1_sr2 <- ECP.ACC_step1_sr2 %>% 
+  select(Est., part.r) %>% 
+  na.omit() %>% 
+  mutate(sr2 = part.r^2)
+ECP.ACC_step1_sr2 <- as.character(round(ECP.ACC_step1_sr2$sr2, 3))
+ECP.ACC_bweights <-summ(ECP.ACC_step2, digits = 3, part.corr = TRUE)
+ECP.ACC_sr2 <- as.data.frame(ECP.ACC_bweights$coeftable)
+ECP.ACC_sr2 <- ECP.ACC_sr2 %>%
+  select(Est., part.r) %>%
+  na.omit() %>%
+  mutate(sr2 = part.r^2)
+ECP.ACC_sr2 <- as.character(round(ECP.ACC_sr2$sr2, 3))
+# calculate standardized betas
+  ECP.ACC_step1 <- lm.beta(ECP.ACC_step1) 
+  ECP.ACC_step2 <- lm.beta(ECP.ACC_step2) 
+
+
+# prepare data for results table 
+# step 1 values
+t4_b1 <-c("", round(summary(ECP.ACC_step1)$coefficients[,1], digits = 3))
+t4_se1 <-c("", round(summary(ECP.ACC_step1)$coefficients[,3], digits = 3))
+t4_t1 <-c("", round(summary(ECP.ACC_step1)$coefficients[,4], digits = 2))
+t4_p1 <-c("", round(summary(ECP.ACC_step1)$coefficients[,5], digits = 3))
+t4_sr21 <- c("","", ECP.ACC_step1_sr2)
+t4_R21 <- c(round(summary(ECP.ACC_step1)$adj.r.squared, digits = 2), "", "", "", "")
+t4_delta1 <- c("" , "", "", "", "")
+# step 2 values
+t4_b2 <-c("", round(summary(ECP.ACC_step2)$coefficients[,1], digits = 3))
+t4_se2 <-c("", round(summary(ECP.ACC_step2)$coefficients[,3], digits = 3))
+t4_t2 <-c("", round(summary(ECP.ACC_step2)$coefficients[,4], digits = 2))
+t4_p2 <-c("", round(summary(ECP.ACC_step2)$coefficients[,5], digits = 3))
+t4_sr22 <- c("","",ECP.ACC_sr2)
+t4_R22 <- c(round(summary(ECP.ACC_step2)$adj.r.squared, digits = 2), "", "", "", "", "", "", "", "")
+t4_delta2 <- c(round(modelCompare(ECP.ACC_step1, ECP.ACC_step2)$Delta, digits = 3), "", "", "", "", "", "", "", "")
+
+```
+
+```{r ECP regressions tables , echo = FALSE, message = FALSE, fig.width=8, fig.height=8}
+
+# Descriptives Table
+apa_table(ECP_cor_tbl, align = c("l", rep("c", 10)), caption = "Means, standard deviations and correlations of all variables of interest for the regression analysis predicting performance in the English Crowdsourcing Project Word Knowledge Task (N = 7,010)", note = "M and SD are used to represent mean and standard deviation, respectively. zRT = standardized reaction times. * indicates p < .05. ** indicates p < .01.", row.names = FALSE)
+
+#Make Results Table
+tbl4_1 <- data.frame(t3_b1, t3_se1, t3_t1, t3_p1, t3_sr21, t3_R21, t3_delta1)
+colnames(tbl4_1) <- c("b", "SE", "t", "p", "sr2", "R2", "∆R2")
+tbl4_2 <- data.frame(t3_b2, t3_se2, t3_t2, t3_p2, t3_sr22, t3_R22, t3_delta2)
+colnames(tbl4_2) <- c("b", "SE", "t", "p", "sr2", "R2", "∆R2")
+tbl4_3 <- data.frame(t4_b1, t4_se1, t4_t1, t4_p1, t4_sr21, t4_R21, t4_delta1)
+colnames(tbl4_3) <- c("b", "SE", "t", "p", "sr2", "R2", "∆R2")
+tbl4_4 <- data.frame(t4_b2, t4_se2, t4_t2, t4_p2, t4_sr22, t4_R22, t4_delta2)
+colnames(tbl4_4) <- c("b", "SE", "t", "p", "sr2", "R2", "∆R2")
+
+tbl4_12 <- rbind(tbl4_1, tbl4_2)
+tbl4_34 <- rbind(tbl4_3, tbl4_4)
+tbl4 <- cbind(tbl3_pred, tbl4_12)
+tbl4 <- cbind(tbl4, tbl4_34)
+row.names(tbl4) <- NULL
+
+apa_table(tbl4, align = c("l", rep("c", 7)), caption = "Regression Coefficients from Item-Level Analyses Predicting ECP Word Knowledge Task Latencies and Accuracy (N = 7,010)", note = "b represents unstandardized regression weights. SE represents the standard error of the regression weights. sr2 represents the semi-partial correlation squared. zRTs standardized reaction times. *p < .05; **p < .01; ***p < .001", stub_indents = list(c(2:5), c(7:14)))
+
+
+```
+
+There were `r format(nrow(ECP_data), big.mark = ",")` items for which we had values for all variables of interest in the analysis predicting performance in the ECP word knowledge task. Descriptive statistics and zero-order correlations between all variables of interest from this dataset are reported in supplementary Table S2. The statistical results are reported in Table 4 and the standardized coefficients and illustrated in Figure 3B. In this analysis, the control variables were all significant predictors of response latencies – RTs were faster for words that are shorter, more frequent and acquired earlier. There was significant improvement in model fit with the addition of the semantic variables, which accounted for a further `r round(modelCompare(ECP.RT_step1, ECP.RT_step2)$Delta*100, digits = 2)`% of variance in recognition RTs. All semantic variables were significant predictors, with faster RTs for words with increased socialness, concreteness and valence extremity and for those encountered in more semantically diverse contexts. The control variables were all significant predictors of recognition accuracy, with better accuracy for words that are longer, more frequent and acquired earlier. There was significant improvement in model fit with the inclusion of the semantic variables, which accounted for an additional `r round(modelCompare(ECP.ACC_step1, ECP.ACC_step2)$Delta*100, digits = 2)`% of variance in recognition accuracy. Valence and semantic diversity were the only significant semantic predictors – accuracy was higher for words that are more valenced and encountered in more semantically diverse contexts.
+
+```{r betas figure, echo = FALSE, message = FALSE, fig.width=8, fig.height=8}
+# Standardized regression weights figure
+ 
+ # first row figure LDT
+p1 <- plot_summs(LDT.RT_step2, LDT.ACC_step2,model.names = c("Reaction Time", "Accuracy"), legend.title = "Outcome Variable",colors = "Qual1", scale = TRUE,  transform.response = TRUE)+ scale_y_discrete(labels = c("Semantic Diversity", "Valence Extremity", "Concreteness", "Socialness", "Age of Acquisition", "Frequency", "Length")) + labs(x = "Standardized Coefficient", title = "A. Lexical Decision Task")+ theme_minimal() + theme(axis.title = element_blank(), text = element_text(size = 12), axis.text.y = element_text(size = 12) ,legend.position = "none", plot.title = element_text(hjust = -0.4)) + coord_cartesian(xlim = c(-0.35,0.35), expand = FALSE) 
+  # second row figure ECP
+p2 <- plot_summs(ECP.RT_step2, ECP.ACC_step2, model.names = c("Reaction Time", "Accuracy"), legend.title = "Outcome Variable",colors = "Qual1", scale = TRUE,  transform.response = TRUE)+ scale_y_discrete(labels = c("Semantic Diversity", "Valence Extremity", "Concreteness", "Socialness", "Age of Acquisition", "Frequency", "Length")) + labs(x = "Standardized Coefficient", title = "B. Word Knowledge Task")+ theme_minimal() + theme(axis.title.y = element_blank(), text = element_text(size = 12), axis.text.y = element_text(size = 12),legend.text = element_text(size = 12),  legend.position = "bottom", plot.title = element_text(hjust = -0.4))+ coord_cartesian(xlim = c(-0.35,0.35), expand = FALSE) 
+
+# make figure
+fig3 <- plot_grid(p1, p2, nrow = 2,  ncol = 1, label_size = 14, label_x =-0.32, label_y = 1.016, axis = "l", align = "v", rel_heights = c(1, 1.1)) + theme(plot.margin = margin(20, 20, 20, 20, "pt"), plot.background = element_rect(colour = "black", fill=NA, size=0.2))
+
+# save figure
+ggsave("Figures/Standardized_coefficients.tiff", height = 8, width = 8)
+ggsave("Figures/Standardized_coefficients.png", height = 8, width = 8)
+
+# visualize figure
+fig3
+
+```
+
+
