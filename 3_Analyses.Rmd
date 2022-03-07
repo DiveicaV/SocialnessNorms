@@ -7,7 +7,7 @@ This code runs correlations, regression models and generates all tables and figu
 - zero-order correlations between socialness and other lexical and semantic variables
 - hierarchical regression analyses for outcome variables: LDT RT and Accuracy (English
     Lexicon Project)
-- hierarchical regression analyses for outcome variables: Recognition RT and Accuracy
+- hierarchical regression analyses for outcome variables: Recognition RT and Proportion Unknown
     (English Crowdsourcing Project)
 
 # Session Information:
@@ -80,7 +80,7 @@ socialness <- read_csv("Data/Ratings_sum.stat.csv")
 
 # OLD, PLD, Frequency, LDT RT & Accuracy
 ELP <- read_csv("Data/Other/ELP_Items.csv")
-ELP <- ELP %>% select(Word, OLD, PLD, LgSUBTLWF, I_Zscore, I_Mean_Accuracy)
+ELP <- ELP %>% select(Word, OLD, PLD, LgSUBTLWF, I_Zscore, I_Mean_Accuracy) 
 colnames(ELP)[4:6] <- c("Frequency", "LDT_zRT", "LDT_Accuracy")
 
 # Age of Acquisition
@@ -178,154 +178,12 @@ fig2
 ```
 
 
-```{r scatterplots, include = FALSE}
-# create scatterplots for supplementary figure
-
-sup1 <- ggplot(corr_data, aes(x=Socialness, y=Length)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) + 
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() + 
-      theme(text = element_text(size = 10)) + 
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7)) + 
-      labs(x = "Socialness", y ="Letter Length")
-
-sup1 <- ggMarginal(sup1, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-sup2 <- ggplot(corr_data, aes(x=Socialness, y=Frequency)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y ="Frequency") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))  
-sup2 <- ggMarginal(sup2, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-sup3 <- ggplot(corr_data, aes(x=Socialness, y=OLD)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y ="OLD") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))  
-sup3 <- ggMarginal(sup3, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-sup4 <- ggplot(corr_data, aes(x=Socialness, y=PLD)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y ="PLD") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))  
-sup4 <- ggMarginal(sup4, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-sup5 <- ggplot(corr_data, aes(x=Socialness, y=`AoA Rating`)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y ="AoA Rating") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup5 <- ggMarginal(sup5, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-
-sup6 <- ggplot(corr_data, aes(x=Socialness, y=`AoA Test-based`)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y ="Test-based AoA") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup6 <- ggMarginal(sup6, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-sup7 <- ggplot(corr_data, aes(x=Socialness, y=`Concreteness`)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y = "Concreteness") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup7 <- ggMarginal(sup7, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-
-sup8 <- ggplot(corr_data, aes(x=Socialness, y=`Imageability`)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y = "Imageability") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup8 <- ggMarginal(sup8, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-
-sup9 <- ggplot(corr_data, aes(x=Socialness, y=BOI)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y = "BOI") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup9 <- ggMarginal(sup9, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-
-sup10 <- ggplot(corr_data, aes(x=Socialness, y=SER)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y = "SER") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup10 <- ggMarginal(sup10, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-
-sup11 <- ggplot(corr_data, aes(x=Socialness, y=`Valence Extremity`)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y = "Valence Extremity") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup11 <- ggMarginal(sup11, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-
-sup12 <- ggplot(corr_data, aes(x=Socialness, y=Arousal)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y = "Arousal") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup12 <- ggMarginal(sup12, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-sup13 <- ggplot(corr_data, aes(x=Socialness, y=Dominance)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y = "Dominance") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup13 <- ggMarginal(sup13, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-sup14 <- ggplot(corr_data, aes(x=Socialness, y=`Semantic Diversity`)) +
-      geom_point(shape=1, alpha = .5, size = 0.5) +
-      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
-      theme_classic() +
-      labs(x = "Socialness", y ="Semantic Diversity") +
-      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
-      theme(text = element_text(size = 10))
-sup14 <- ggMarginal(sup14, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
-
-# create scatterplot figure
-sup <- plot_grid(sup1,sup2,sup3,sup4,sup5,sup6,sup7,sup8,sup9,sup10,sup11,sup12,sup13,sup14, nrow = 5,  ncol = 3, axis = "l", align = "v")
-ggsave("Figures/Scatterplots.tiff", height = 7, width = 7)
-ggsave("Figures/Scatterplots.png", height = 7, width = 7)
-```
-
-**Figure 2**Correlations between socialness ratings and lexical-semantic dimensions. Only correlations significant at *p* < .01 are shown. The strength and direction of the correlation coefficients are indicated by the colour and the numerical values. For each variable of interest, the numbers of items in common with our socialness ratings are as follows:`r format(sum(!is.na(corr_data$Arousal)), big.mark = ",")` for valence, arousal and dominance; `r format(sum(!is.na(corr_data$Length)), big.mark = ",")` length, `r format(sum(!is.na(corr_data$Frequency)), big.mark = ",")` for frequency, `r format(sum(!is.na(corr_data$OLD)), big.mark = ",")` OLD, `r format(sum(!is.na(corr_data$PLD)), big.mark = ",")` for PLD, `r format(sum(!is.na(corr_data$"AoA Rating")), big.mark = ",")` for rating-based AoA, `r format(sum(!is.na(corr_data$"AoA Test-based")), big.mark = ", ")` for test-based AoA, `r format(sum(!is.na(corr_data$Concreteness)), big.mark = ",")` for concreteness, `r format(sum(!is.na(corr_data$Imageability)), big.mark = ",")` for imageability, `r format(sum(!is.na(corr_data$BOI)), big.mark = ",")` for BOI and `r format(sum(!is.na(corr_data$SER)), big.mark = ",")` for SER. SER = sensory experience rating; BOI = body-object interaction; AoA = age of acquisition; PLD = phonologic Levenshtein distance; OLD = orthographic Levenshtein distance. 
+**Figure 2**Correlations between socialness ratings and lexical-semantic dimensions. Only correlations significant at *p* < .01 are shown. The strength and direction of the correlation coefficients are indicated by the colour and the numerical values. For each variable of interest, the numbers of items in common with our socialness ratings are as follows: valence, arousal and dominance: `r format(sum(!is.na(corr_data$Arousal)), big.mark = ",")`; length: `r format(sum(!is.na(corr_data$Length)), big.mark = ",")`; log subtitle frequency: `r format(sum(!is.na(corr_data$Frequency)), big.mark = ",")`; OLD: `r format(sum(!is.na(corr_data$OLD)), big.mark = ",")`; PLD: `r format(sum(!is.na(corr_data$PLD)), big.mark = ",")`; rating-based AoA: `r format(sum(!is.na(corr_data$"AoA Rating")), big.mark = ",")`; test-based AoA: `r format(sum(!is.na(corr_data$"AoA Test-based")), big.mark = ", ")`; concreteness: `r format(sum(!is.na(corr_data$Concreteness)), big.mark = ",")`; imageability: `r format(sum(!is.na(corr_data$Imageability)), big.mark = ",")`; BOI: `r format(sum(!is.na(corr_data$BOI)), big.mark = ",")`; SER: `r format(sum(!is.na(corr_data$SER)), big.mark = ",")`. SER = sensory experience rating; BOI = body-object interaction; AoA = age of acquisition; PLD = phonologic Levenshtein distance; OLD = orthographic Levenshtein distance. 
 
 
 **Correlations with Lexical and Semantic Properties**
 
-We examined the correlations between the socialness ratings and various lexical and semantic properties of the words (Figure 2). The lexical variables included letter length, orthographic Levenshtein distance (Yarkoni et al., 2008), phonological Levenshtein distance and frequency (log subtitle frequency; (Brysbaert & New, 2009)). The semantic variables included concreteness (Brysbaert et al., 2014), imageability (Cortese & Fugett, 2004; Schock et al., 2012), body-object interaction (Pexman et al., 2019), sensory experience ratings (Juhasz & Yap, 2012), valence extremity (i.e. the absolute value of the difference between the valence rating from 5, the neutral point on the scale (Warriner et al., 2013)), arousal (Warriner et al., 2013), dominance (Warriner et al., 2013), , rating-based age of acquisition (AoA) (Kuperman et al., 2012), and a test-based AoA measure derived from (Dale & O’Rourke, 1981) and updated by (Brysbaert & Biemiller, 2017). 
+We examined the correlations between the socialness ratings and various lexical and semantic properties of the words. The lexical variables included letter length, orthographic Levenshtein distance (Yarkoni et al., 2008), phonological Levenshtein distance and frequency (log subtitle frequency; Brysbaert & New, 2009) and assessed whether the socialness measure captures basic lexical attributes. To assess the relationship between the socialness ratings and sensorimotor information, the semantic variables included concreteness (the degree to which the word’s referent can be experienced through one of the five senses ; Brysbaert et al., 2014), imageability (the ease with which the word arouses a mental image ; Cortese & Fugett, 2004; Schock et al., 2012), body-object interaction (BOI; the ease with which a human body can physically interact with a word’s referent; Pexman et al., 2019), and sensory experience ratings (the degree of sensory experience evoked; Juhasz & Yap, 2012). To assess the relationship between the socialness ratings and affective information, the semantic variables included valence extremity (i.e. the absolute value of the difference between the valence rating from 5, the neutral point on the scale measuring the degree to which the word evokes positive as opposed to negative feelings; Warriner et al., 2013), arousal (the degree to which the word evokes feelings of arousal as opposed to calm; Warriner et al., 2013), and dominance (the degree to which the word evokes feelings of being controlled as opposed to in control; Warriner et al., 2013). Finally, to assess the relationship between the socialness ratings and linguistic experience, the semantic variables included semantic diversity (the extent to which a word appears in semantically-diverse contexts; Hoffman et al., 2013), rating-based age of acquisition (AoA) (Kuperman et al., 2012), and a test-based AoA measure derived from (Dale & O’Rourke, 1981) and updated by (Brysbaert & Biemiller, 2017). 
 
 These correlations revealed several interesting relationships that provide insight as to the nature of the word socialness measure (Figure 2; see Figure S1 for scatterplots). Socialness negatively correlated with concreteness (*r* = `r round(corr_results$r[8,1], digits = 2)`), imageability (*r* = `r round(corr_results$r[9,1], digits = 2)`), and BOI (*r* = `r round(corr_results$r[10,1], digits = 2)`), which suggests that words with less social relevance are associated with more embodied sensorimotor information. In contrast, socialness ratings positively correlated with valence extremity (*r* = `r round(corr_results$r[12,1], digits = 2)`), and arousal (*r* = `r round(corr_results$r[13,1], digits = 2)`), suggesting that social words tend to have more affective information. 
 
@@ -333,11 +191,11 @@ These correlations revealed several interesting relationships that provide insig
 ```{r prepare LDT data, include = FALSE}
 
 # prepare data
-LDT_data <- data %>% select(Word, Length, Frequency, AoA.Rating, Socialness, Concreteness, Valence_ext, SemanticDiversity, LDT_zRT, LDT_Accuracy) %>% drop_na()
+LDT_data <- data %>% select(Word, Length, Frequency, AoA.Rating, Socialness, Concreteness, Valence_ext, SemanticDiversity, LDT_zRT, LDT_Accuracy) %>% drop_na() %>% mutate(LDT_Errors = 1 - LDT_Accuracy) %>% select(!LDT_Accuracy)
 
 # prepare descriptives for variables of interest supplementary table
 LDT_cor_tbl <- LDT_data 
-colnames(LDT_cor_tbl)[2:10] <- c("Length", "Frequency", "Age of Acquisition", "Socialness", "Concreteness", "Valence Extremity", "Semantic Diversity", "LDT zRT", "LDT Accuracy")
+colnames(LDT_cor_tbl)[2:10] <- c("Length", "Frequency", "Age of Acquisition", "Socialness", "Concreteness", "Valence Extremity", "Semantic Diversity", "LDT zRT", "LDT Error Rate")
 LDT_cor_tbl <- apa.cor.table(LDT_cor_tbl)
 LDT_cor_tbl <- as.data.frame(LDT_cor_tbl$table.body)
 LDT_cor_tbl$M <- as.numeric(as.character(LDT_cor_tbl$M)) 
@@ -407,8 +265,8 @@ t1_delta2 <- c(round(modelCompare(LDT.RT_step1, LDT.RT_step2)$Delta, digits = 3)
 ```{r LDT accuracy regression, include = FALSE}
 
 # specify regression models
-LDT.ACC_step1 <- lm(LDT_Accuracy ~ Length + Frequency + AoA.Rating, LDT_data)
-LDT.ACC_step2 <- lm(LDT_Accuracy ~ Length + Frequency + AoA.Rating + Socialness + Concreteness + Valence_ext + SemanticDiversity, LDT_data)
+LDT.ACC_step1 <- lm(LDT_Errors ~ Length + Frequency + AoA.Rating, LDT_data)
+LDT.ACC_step2 <- lm(LDT_Errors ~ Length + Frequency + AoA.Rating + Socialness + Concreteness + Valence_ext + SemanticDiversity, LDT_data)
 # compare models
 modelCompare(LDT.ACC_step1, LDT.ACC_step2)
 
@@ -483,17 +341,16 @@ apa_table(tbl3, caption = "Regression Coefficients from Item-Level Analyses Pred
 
 
 
-There were `r format(nrow(LDT_data), big.mark = ",")` items for which we had values for all variables of interest in the analysis predicting LDT performance. Descriptive statistics and zero-order correlations between all variables of interest from this dataset are reported in supplementary Table S1. The statistical results are reported in Table 3 and the standardized coefficients are illustrated in Figure 3A. In this analysis, the control variables were all significant predictors of LDT latencies – RTs were faster for words that are shorter, more frequent and acquired earlier. There was significant improvement in model fit with the addition of the semantic variables, which collectively accounted for a further `r round(modelCompare(LDT.RT_step1, LDT.RT_step2)$Delta*100, digits = 2)`% of variance in LDT latencies. Of the semantic variables, only socialness and semantic diversity were significant predictors, with faster RTs for words with increased social relevance and those encountered in more semantically diverse contexts. A similar pattern of results was observed when predicting LDT accuracy. The control variables were all significant predictors, with better accuracy for words that are longer, more frequent and acquired earlier. There was significant improvement in model fit with the inclusion of the semantic variables, which accounted for an additional `r round(modelCompare(LDT.ACC_step1, LDT.ACC_step2)$Delta*100, digits = 2)`% of variance in LDT accuracy. Socialness and semantic diversity were the only significant semantic predictors – accuracy was higher for words with increased socialness and for those that are more semantically-diverse.
+There were `r format(nrow(LDT_data), big.mark = ",")` items for which we had values for all variables of interest in the analysis predicting LDT performance. Descriptive statistics and zero-order correlations between all variables of interest from this dataset are reported in supplementary Table S1. The statistical results are reported in Table 3 and the standardized coefficients are illustrated in Figure 3A. In this analysis, the control variables were all significant predictors of LDT latencies – RTs were faster for words that are shorter, more frequent and acquired earlier. There was significant improvement in model fit with the addition of the semantic variables, which collectively accounted for a further `r round(modelCompare(LDT.RT_step1, LDT.RT_step2)$Delta*100, digits = 2)`% of variance in LDT latencies. Of the semantic variables, only socialness and semantic diversity were significant predictors, with faster RTs for words with increased social relevance and those encountered in more semantically diverse contexts. A similar pattern of results was observed when predicting LDT error rates. The control variables were all significant predictors, with less errors for words that are longer, more frequent and acquired earlier. There was significant improvement in model fit with the inclusion of the semantic variables, which accounted for an additional `r round(modelCompare(LDT.ACC_step1, LDT.ACC_step2)$Delta*100, digits = 2)`% of variance in LDT error rates. Socialness and semantic diversity were the only significant semantic predictors – error rates were lower for words with increased socialness and for those that are more semantically-diverse.
 
 ```{r prepare ECP data, include = FALSE}
 
 # prepare data
-ECP_data <- data %>%
-  select(Word, Length, Frequency, AoA.Rating, Socialness, Concreteness, Valence_ext, SemanticDiversity, ECP_zRT, ECP_Accuracy) %>% drop_na()
+ECP_data <- data %>% select(Word, Length, Frequency, AoA.Rating, Socialness, Concreteness, Valence_ext, SemanticDiversity, ECP_zRT, ECP_Accuracy) %>% drop_na() %>% mutate(ECP_PropUnknown = 1-ECP_Accuracy) %>% select(!ECP_Accuracy)
 
 # prepare descriptives for variables of interest table
 ECP_cor_tbl <- ECP_data 
-colnames(ECP_cor_tbl)[2:10] <- c("Length", "Frequency", "Age of Acquisition", "Socialness", "Concreteness", "Valence Extremity", "Semantic Diversity", "Recognition zRT", "Recognition Accuracy")
+colnames(ECP_cor_tbl)[2:10] <- c("Length", "Frequency", "Age of Acquisition", "Socialness", "Concreteness", "Valence Extremity", "Semantic Diversity", "Recognition zRT", "Proportion Unknown")
 ECP_cor_tbl <- apa.cor.table(ECP_cor_tbl)
 ECP_cor_tbl <- as.data.frame(ECP_cor_tbl$table.body)
 ECP_cor_tbl$M <- as.numeric(as.character(ECP_cor_tbl$M)) 
@@ -561,8 +418,8 @@ t3_delta2 <- c(round(modelCompare(ECP.RT_step1, ECP.RT_step2)$Delta, digits = 3)
 ```{r ECP accuracy regression, include = FALSE}
 
 # specify regression models
-ECP.ACC_step1 <- lm(ECP_Accuracy ~ Length + Frequency + AoA.Rating, ECP_data)
-ECP.ACC_step2 <- lm(ECP_Accuracy ~ Length + Frequency + AoA.Rating + Socialness + Concreteness + Valence_ext + SemanticDiversity, ECP_data)
+ECP.ACC_step1 <- lm(ECP_PropUnknown ~ Length + Frequency + AoA.Rating, ECP_data)
+ECP.ACC_step2 <- lm(ECP_PropUnknown ~ Length + Frequency + AoA.Rating + Socialness + Concreteness + Valence_ext + SemanticDiversity, ECP_data)
 # compare models
 modelCompare(ECP.ACC_step1, ECP.ACC_step2)
 
@@ -636,26 +493,186 @@ apa_table(tbl4, align = c("l", rep("c", 7)), caption = "Regression Coefficients 
 
 ```
 
-There were `r format(nrow(ECP_data), big.mark = ",")` items for which we had values for all variables of interest in the analysis predicting performance in the ECP word knowledge task. Descriptive statistics and zero-order correlations between all variables of interest from this dataset are reported in supplementary Table S2. The statistical results are reported in Table 4 and the standardized coefficients and illustrated in Figure 3B. In this analysis, the control variables were all significant predictors of response latencies – RTs were faster for words that are shorter, more frequent and acquired earlier. There was significant improvement in model fit with the addition of the semantic variables, which accounted for a further `r round(modelCompare(ECP.RT_step1, ECP.RT_step2)$Delta*100, digits = 2)`% of variance in recognition RTs. All semantic variables were significant predictors, with faster RTs for words with increased socialness, concreteness and valence extremity and for those encountered in more semantically diverse contexts. The control variables were all significant predictors of recognition accuracy, with better accuracy for words that are longer, more frequent and acquired earlier. There was significant improvement in model fit with the inclusion of the semantic variables, which accounted for an additional `r round(modelCompare(ECP.ACC_step1, ECP.ACC_step2)$Delta*100, digits = 2)`% of variance in recognition accuracy. Valence and semantic diversity were the only significant semantic predictors – accuracy was higher for words that are more valenced and encountered in more semantically diverse contexts.
+There were `r format(nrow(ECP_data), big.mark = ",")` items for which we had values for all variables of interest in the analysis predicting performance in the ECP word knowledge task. Descriptive statistics and zero-order correlations between all variables of interest from this dataset are reported in supplementary Table S2. The statistical results are reported in Table 4 and the standardized coefficients and illustrated in Figure 3B. In this analysis, the control variables were all significant predictors of response latencies – RTs were faster for words that are shorter, more frequent and acquired earlier. There was significant improvement in model fit with the addition of the semantic variables, which accounted for a further `r round(modelCompare(ECP.RT_step1, ECP.RT_step2)$Delta*100, digits = 2)`% of variance in recognition RTs. All semantic variables were significant predictors, with faster RTs for words with increased socialness, concreteness and valence extremity and for those encountered in more semantically diverse contexts. The control variables were all significant predictors of the proportion of participants reporting not knowing a word, with words that are longer, more frequent and acquired earlier being more prevalent. There was significant improvement in model fit with the inclusion of the semantic variables, which accounted for an additional `r round(modelCompare(ECP.ACC_step1, ECP.ACC_step2)$Delta*100, digits = 2)`% of variance in in ECP proportion unknown. Valence and semantic diversity were the only significant semantic predictors – words that are more valenced and encountered in more semantically diverse contexts were reported as known by more participants.
 
 ```{r betas figure, echo = FALSE, message = FALSE, fig.width=8, fig.height=8}
 # Standardized regression weights figure
  
  # first row figure LDT
-p1 <- plot_summs(LDT.RT_step2, LDT.ACC_step2,model.names = c("Reaction Time", "Accuracy"), legend.title = "Outcome Variable",colors = "Qual1", scale = TRUE,  transform.response = TRUE)+ scale_y_discrete(labels = c("Semantic Diversity", "Valence Extremity", "Concreteness", "Socialness", "Age of Acquisition", "Frequency", "Length")) + labs(x = "Standardized Coefficient", title = "A. Lexical Decision Task")+ theme_minimal() + theme(axis.title = element_blank(), text = element_text(size = 12), axis.text.y = element_text(size = 12) ,legend.position = "none", plot.title = element_text(hjust = -0.4)) + coord_cartesian(xlim = c(-0.35,0.35), expand = FALSE) 
+p1 <- plot_summs(LDT.RT_step2, LDT.ACC_step2,model.names = c("Reaction Time", "Error Rate"), legend.title = "Outcome Variable",colors = "Qual1", scale = TRUE,  transform.response = TRUE) + 
+  scale_y_discrete(labels = c("Semantic Diversity", "Valence Extremity", "Concreteness", "Socialness", "Age of Acquisition", "Frequency", "Length")) + 
+  labs(x = "Standardized Coefficient", title = "A. Lexical Decision Task") + 
+  theme_minimal() +
+  theme(axis.title = element_blank(), 
+        text = element_text(size = 12), 
+        axis.text.y = element_text(size = 12),
+        legend.text = element_text(size = 12),  
+        legend.position = "bottom", 
+        plot.title = element_text(hjust = -0.4, face = "bold")) + 
+  coord_cartesian(xlim = c(-0.35,0.35), expand = FALSE) 
+
   # second row figure ECP
-p2 <- plot_summs(ECP.RT_step2, ECP.ACC_step2, model.names = c("Reaction Time", "Accuracy"), legend.title = "Outcome Variable",colors = "Qual1", scale = TRUE,  transform.response = TRUE)+ scale_y_discrete(labels = c("Semantic Diversity", "Valence Extremity", "Concreteness", "Socialness", "Age of Acquisition", "Frequency", "Length")) + labs(x = "Standardized Coefficient", title = "B. Word Knowledge Task")+ theme_minimal() + theme(axis.title.y = element_blank(), text = element_text(size = 12), axis.text.y = element_text(size = 12),legend.text = element_text(size = 12),  legend.position = "bottom", plot.title = element_text(hjust = -0.4))+ coord_cartesian(xlim = c(-0.35,0.35), expand = FALSE) 
+p2 <- plot_summs(ECP.RT_step2, ECP.ACC_step2, model.names = c("Reaction Time", "Proportion Unknown"), legend.title = "Outcome Variable",colors = "Qual1", scale = TRUE,  transform.response = TRUE) + 
+  scale_y_discrete(labels = c("Semantic Diversity", "Valence Extremity", "Concreteness", "Socialness", "Age of Acquisition", "Frequency", "Length")) + 
+  labs(x = "Standardized Coefficient", title = "B. Word Knowledge Task") + 
+  theme_minimal() + 
+  theme(axis.title.y = element_blank(), 
+        text = element_text(size = 12), 
+        axis.text.y = element_text(size = 12),
+        legend.text = element_text(size = 12),  
+        legend.position = "bottom", 
+        plot.title = element_text(hjust = -0.4, face = "bold")) + 
+  coord_cartesian(xlim = c(-0.35,0.35), expand = FALSE) 
 
 # make figure
 fig3 <- plot_grid(p1, p2, nrow = 2,  ncol = 1, label_size = 14, label_x =-0.32, label_y = 1.016, axis = "l", align = "v", rel_heights = c(1, 1.1)) + theme(plot.margin = margin(20, 20, 20, 20, "pt"), plot.background = element_rect(colour = "black", fill=NA, size=0.2))
 
 # save figure
-ggsave("Figures/Standardized_coefficients.tiff", height = 8, width = 8)
-ggsave("Figures/Standardized_coefficients.png", height = 8, width = 8)
+ggsave("Figures/Standardized_coefficients_R1.tiff", height = 8, width = 8)
+ggsave("Figures/Standardized_coefficients_R1.png", height = 8, width = 8)
 
 # visualize figure
 fig3
 
 ```
 
+```{r scatterplots, include = FALSE}
+# create scatterplots for supplementary figure
 
+sup1 <- ggplot(corr_data, aes(x=Socialness, y=Length)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) + 
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7)) + 
+      theme_classic() + 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5)) + 
+      labs(x = "", y ="Letter Length", title = "Letter Length")
+sup1 <- ggMarginal(sup1, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup2 <- ggplot(corr_data, aes(x=Socialness, y=Frequency)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y ="Frequency", title = "Frequency") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup2 <- ggMarginal(sup2, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup3 <- ggplot(corr_data, aes(x=Socialness, y=OLD)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y ="OLD", title = "OLD") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5)) 
+sup3 <- ggMarginal(sup3, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup4 <- ggplot(corr_data, aes(x=Socialness, y=PLD)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y ="PLD", title = "PLD") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup4 <- ggMarginal(sup4, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup5 <- ggplot(corr_data, aes(x=Socialness, y=`AoA Rating`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y ="AoA", title = "AoA Rating-based") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup5 <- ggMarginal(sup5, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup6 <- ggplot(corr_data, aes(x=Socialness, y=`AoA Test-based`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y ="AoA", title = "AoA Test-based") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup6 <- ggMarginal(sup6, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup7 <- ggplot(corr_data, aes(x=Socialness, y=`Concreteness`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y = "Concreteness", title = "Concreteness") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup7 <- ggMarginal(sup7, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup8 <- ggplot(corr_data, aes(x=Socialness, y=`Imageability`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y = "Imageability", title = "Imageability") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup8 <- ggMarginal(sup8, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup9 <- ggplot(corr_data, aes(x=Socialness, y=BOI)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y = "BOI", title = "BOI") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup9 <- ggMarginal(sup9, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup10 <- ggplot(corr_data, aes(x=Socialness, y=SER)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y = "SER", title = "SER") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup10 <- ggMarginal(sup10, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup11 <- ggplot(corr_data, aes(x=Socialness, y=`Valence Extremity`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y = "Valence Extremity", title = "Valence Extremity") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup11 <- ggMarginal(sup11, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+
+sup12 <- ggplot(corr_data, aes(x=Socialness, y=Arousal)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y = "Arousal", title = "Arousal") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup12 <- ggMarginal(sup12, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup13 <- ggplot(corr_data, aes(x=Socialness, y=Dominance)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "", y = "Dominance", title = "Dominance") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup13 <- ggMarginal(sup13, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+sup14 <- ggplot(corr_data, aes(x=Socialness, y=`Semantic Diversity`)) +
+      geom_point(shape=1, alpha = .5, size = 0.5) +
+      geom_smooth(method=loess , color="#7a6bd4", fill="#7a6bd4", se=TRUE)+
+      theme_classic() +
+      labs(x = "Socialness", y ="Semantic Diversity", title = "Semantic Diversity") +
+      scale_x_continuous(breaks = c(1,2,3,4,5,6,7))+ 
+      theme(text = element_text(size = 10), plot.title = element_text(face = "bold", hjust = 0.5))  
+sup14 <- ggMarginal(sup14, type="density", size=7, fill = "#7a6bd4", alpha = 0.4)
+
+# create scatterplot figure
+sup <- plot_grid(sup1,sup2,sup3,sup4,sup5,sup6,sup7,sup8,sup9,sup10,sup11,sup12,sup13,sup14, nrow = 5,  ncol = 3, axis = "l", align = "v")
+ggsave("Figures/Scatterplots.tiff", height = 8.5, width = 7)
+ggsave("Figures/Scatterplots.png", height = 8.5, width = 7)
+```
