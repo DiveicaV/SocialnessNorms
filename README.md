@@ -1,5 +1,5 @@
 # Socialness Norms
-**Data** and **scripts** associated with the manuscript *Quantifying Social Semantics: An Inclusive Definition of Socialness and Ratings for 8,388 English Words* by Diveica, Pexman, & Binney
+**Data** and **scripts** associated with the publication *Quantifying Social Semantics: An Inclusive Definition of Socialness and Ratings for 8,388 English Words* by Diveica, Pexman, & Binney available at: https://doi.org/10.3758/s13428-022-01810-x 
 
 **A description of all files is provided below:** 
 
